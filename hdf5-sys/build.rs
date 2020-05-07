@@ -650,6 +650,7 @@ impl Config {
 
 #[cfg(target_os = "linux")]
 mod conda {
+    pub const INC_PATH: &'static str = "include";
     pub const LIB_PATH: &'static str = "lib";
 
     pub const DLS: &[(&'static str, &'static str, &'static str)] = &[
@@ -668,6 +669,7 @@ mod conda {
 
 #[cfg(target_os = "macos")]
 mod conda {
+    pub const INC_PATH: &'static str = "include";
     pub const LIB_PATH: &'static str = "lib";
 
     pub const DLS: &[(&'static str, &'static str, &'static str)] = &[
@@ -686,6 +688,7 @@ mod conda {
 
 #[cfg(target_os = "windows")]
 mod conda {
+    pub const INC_PATH: &'static str = "Library\\include";
     pub const LIB_PATH: &'static str = "Library\\lib";
 
     pub const DLS: &[(&'static str, &'static str, &'static str)] = &[
@@ -811,7 +814,7 @@ fn conda_static() {
     println!("cargo:rustc-link-lib=static=hdf5");
     println!("cargo:rustc-link-lib=static=z");
 
-    let inc_dir = out_dir.join("include");
+    let inc_dir = out_dir.join(conda::INC_PATH);
 
     let header = Header::parse(&inc_dir);
     let cfg = Config { inc_dir, link_paths: Vec::new(), header };
