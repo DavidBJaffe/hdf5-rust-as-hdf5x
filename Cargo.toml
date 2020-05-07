@@ -14,7 +14,7 @@ edition = "2018"
 [features]
 default = []
 mpio = ["mpi-sys", "hdf5-sys/mpio"]
-lzf = ["cc"]
+
 # Use static HDF5 libs downloaded from conda.
 conda = ["hdf5-sys/conda"] 
 

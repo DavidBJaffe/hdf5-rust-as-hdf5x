@@ -35,7 +35,7 @@ conda = []
 libloading = "0.6"
 regex = { version = "1.3", features = ["std"] }
 md5 = "0.6"
-curl = "*"
+attohttpc = { version = "0.12", default-features = false, features = ["compress", "tls-rustls"] }
 bzip2 = "0.3.3"
 tar = "*"
 

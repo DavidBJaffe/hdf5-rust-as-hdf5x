@@ -6,6 +6,7 @@ use std::io::{self, Read, Write};
 use std::os::raw::{c_int, c_uint};
 use std::path::{Path, PathBuf};
 use std::process::Command;
+use std::time::Duration;
 
 use regex::Regex;
 
@@ -14,8 +15,8 @@ fn feature_enabled(feature: &str) -> bool {
 }
 use curl::easy::Easy;
 use bzip2::read::BzDecoder;
-use tar::Archive;
 use md5;
+use tar::Archive;
 
 #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Default)]
 pub struct Version {
@@ -644,7 +645,6 @@ impl Config {
     }
 }
 
-
 // Use `conda search --json --platform 'win-64' hdf5`
 // to query the metadata of conda package (includes MD5 sum).
 
@@ -653,12 +653,16 @@ mod conda {
     pub const LIB_PATH: &'static str = "lib";
 
     pub const DLS: &[(&'static str, &'static str, &'static str)] = &[
-        ("hdf5-1.8.18-h6792536_1.tar.bz2",
-         "https://repo.anaconda.com/pkgs/main/linux-64/hdf5-1.8.18-h6792536_1.tar.bz2",
-         "e1777f7e576b39d342061a1c8d712832"),
-        ("zlib-1.2.11-hfbfcf68_1.tar.bz2", 
-         "https://repo.continuum.io/pkgs/main/linux-64/zlib-1.2.11-hfbfcf68_1.tar.bz2",
-         "cb3dfd6392fcc03474b8d71cf8f0b264")
+        (
+            "hdf5-1.8.18-h6792536_1.tar.bz2",
+            "https://repo.anaconda.com/pkgs/main/linux-64/hdf5-1.8.18-h6792536_1.tar.bz2",
+            "e1777f7e576b39d342061a1c8d712832",
+        ),
+        (
+            "zlib-1.2.11-hfbfcf68_1.tar.bz2",
+            "https://repo.continuum.io/pkgs/main/linux-64/zlib-1.2.11-hfbfcf68_1.tar.bz2",
+            "cb3dfd6392fcc03474b8d71cf8f0b264",
+        ),
     ];
 }
 
@@ -667,12 +671,16 @@ mod conda {
     pub const LIB_PATH: &'static str = "lib";
 
     pub const DLS: &[(&'static str, &'static str, &'static str)] = &[
-        ("hdf5-1.8.20-hfa1e0ec_1.tar.bz2", 
-         "https://repo.continuum.io/pkgs/main/osx-64/hdf5-1.8.20-hfa1e0ec_1.tar.bz2", 
-         "6b7457d9be3293d8ba73c36a0915d5f6"),
-        ("zlib-1.2.11-hf3cbc9b_2.tar.bz2",
-         "https://repo.continuum.io/pkgs/main/osx-64/zlib-1.2.11-hf3cbc9b_2.tar.bz2",
-         "f77c7d05dc47868e181135af65cb6e26")
+        (
+            "hdf5-1.8.20-hfa1e0ec_1.tar.bz2",
+            "https://repo.continuum.io/pkgs/main/osx-64/hdf5-1.8.20-hfa1e0ec_1.tar.bz2",
+            "6b7457d9be3293d8ba73c36a0915d5f6",
+        ),
+        (
+            "zlib-1.2.11-hf3cbc9b_2.tar.bz2",
+            "https://repo.continuum.io/pkgs/main/osx-64/zlib-1.2.11-hf3cbc9b_2.tar.bz2",
+            "f77c7d05dc47868e181135af65cb6e26",
+        ),
     ];
 }
 
@@ -681,35 +689,32 @@ mod conda {
     pub const LIB_PATH: &'static str = "Library\\lib";
 
     pub const DLS: &[(&'static str, &'static str, &'static str)] = &[
-        ("hdf5-1.8.16-vc14_0.tar.bz2", 
-         "https://repo.continuum.io/pkgs/free/win-64/hdf5-1.8.16-vc14_0.tar.bz2", 
-         "c935a1d232cbe8fe09c1ffe0a64a322b"),
-        ("zlib-1.2.11-vc14h1cdd9ab_1.tar.bz2", 
-         "https://repo.continuum.io/pkgs/main/win-64/zlib-1.2.11-vc14h1cdd9ab_1.tar.bz2",
-         "4e2394286375c49f880e159a7efae05f")
+        (
+            "hdf5-1.8.16-vc14_0.tar.bz2",
+            "https://repo.continuum.io/pkgs/free/win-64/hdf5-1.8.16-vc14_0.tar.bz2",
+            "c935a1d232cbe8fe09c1ffe0a64a322b",
+        ),
+        (
+            "zlib-1.2.11-vc14h1cdd9ab_1.tar.bz2",
+            "https://repo.continuum.io/pkgs/main/win-64/zlib-1.2.11-vc14h1cdd9ab_1.tar.bz2",
+            "4e2394286375c49f880e159a7efae05f",
+        ),
     ];
 }
 
-
-
 fn download(uri: &str, filename: &str, out_dir: &Path) {
-
     let out = PathBuf::from(out_dir.join(filename));
 
     // Download the tarball.
     let f = fs::File::create(&out).unwrap();
-    let mut writer = io::BufWriter::new(f);
-    let mut easy = Easy::new();
-    easy.follow_location(true).unwrap();
-    easy.url(&uri).unwrap();
-    easy.write_function(move |data| {
-        Ok(writer.write(data).unwrap())
-    }).unwrap();
-    easy.perform().unwrap();
+    let writer = io::BufWriter::new(f);
 
-    let response_code = easy.response_code().unwrap();
-    if response_code != 200 {
-        panic!("Unexpected response code {} for {}", response_code, uri);
+    let req = attohttpc::get(uri).read_timeout(Duration::new(90, 0));
+
+    let response = req.send().unwrap();
+
+    if !response.is_success() {
+        panic!("Unexpected response code {:?} for {}", response.status(), uri);
     }
 }
 
@@ -797,10 +802,7 @@ fn conda_static() {
 
             let sum = calc_md5(&archive_path);
             if sum != *md5 {
-                panic!(
-                    "check sum of downloaded archive is incorrect: md5sum={}",
-                    sum
-                );
+                panic!("check sum of downloaded archive is incorrect: md5sum={}", sum);
             }
         }
     }
@@ -812,11 +814,7 @@ fn conda_static() {
     let inc_dir = out_dir.join("include");
 
     let header = Header::parse(&inc_dir);
-    let cfg = Config {
-        inc_dir,
-        link_paths: Vec::new(),
-        header,
-    };
+    let cfg = Config { inc_dir, link_paths: Vec::new(), header };
 
     cfg.emit_cfg_flags();
 }
