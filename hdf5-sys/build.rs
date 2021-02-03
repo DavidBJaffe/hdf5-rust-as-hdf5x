@@ -637,11 +637,10 @@ impl Config {
 }
 
 fn main() {
-
     #[cfg(feature = "conda")]
     if env::var("CARGO_FEATURE_CONDA").is_ok() {
         conda_dl::conda_static();
-        return
+        return;
     }
 
     if feature_enabled("STATIC") && std::env::var_os("HDF5_DIR").is_none() {
@@ -693,14 +692,13 @@ fn get_build_and_emit() {
 mod conda_dl {
     use super::*;
 
-    use std::time::Duration;
     use std::io::{self, Read};
     use std::path::PathBuf;
+    use std::time::Duration;
 
     use bzip2::read::BzDecoder;
     use md5;
     use tar::Archive;
-
 
     #[cfg(target_os = "linux")]
     mod conda {
@@ -761,15 +759,15 @@ mod conda_dl {
 
     fn download(uri: &str, filename: &str, out_dir: &Path) {
         let out = PathBuf::from(out_dir.join(filename));
-    
+
         // Download the tarball.
         let f = fs::File::create(&out).unwrap();
         let writer = io::BufWriter::new(f);
-    
+
         let req = attohttpc::get(uri).read_timeout(Duration::new(90, 0));
-    
+
         let response = req.send().unwrap();
-    
+
         if !response.is_success() {
             panic!("Unexpected response code {:?} for {}", response.status(), uri);
         }
@@ -781,11 +779,11 @@ mod conda_dl {
         let mut f = io::BufReader::new(fs::File::open(path).unwrap());
         let mut buf = Vec::new();
         f.read_to_end(&mut buf).unwrap();
-    
+
         let digest = md5::compute(&buf);
         format!("{:x}", digest)
     }
-    
+
     fn extract<P: AsRef<Path>, P2: AsRef<Path>>(archive_path: P, extract_to: P2) {
         let file = fs::File::open(archive_path).unwrap();
         let unzipped = BzDecoder::new(file);
@@ -795,7 +793,7 @@ mod conda_dl {
 
     pub fn conda_static() {
         let out_dir = PathBuf::from(env::var("OUT_DIR").unwrap());
-    
+
         for (archive, uri, md5) in conda::DLS {
             let archive_path = out_dir.join(archive);
             if archive_path.exists() && calc_md5(&archive_path) == *md5 {
@@ -804,33 +802,33 @@ mod conda_dl {
                 println!("Download archive");
                 download(uri, archive, &out_dir);
                 extract(&archive_path, &out_dir);
-    
+
                 let sum = calc_md5(&archive_path);
                 if sum != *md5 {
                     panic!("check sum of downloaded archive is incorrect: md5sum={}", sum);
                 }
             }
         }
-    
+
         println!("cargo:rustc-link-search={}", out_dir.join(conda::LIB_PATH).display());
-    
+
         #[cfg(target_os = "windows")]
         {
             println!("cargo:rustc-link-lib=static=zlibstatic");
             println!("cargo:rustc-link-lib=static=libhdf5");
         }
-    
+
         #[cfg(target_os = "linux")]
         println!("cargo:rustc-link-lib=static=hdf5");
-    
+
         #[cfg(target_os = "macos")]
         println!("cargo:rustc-link-lib=static=hdf5");
-    
+
         #[cfg(not(target_os = "windows"))]
         println!("cargo:rustc-link-lib=static=z");
-    
+
         let inc_dir = out_dir.join(conda::INC_PATH);
-    
+
         let header = Header::parse(&inc_dir);
         let cfg = Config { inc_dir, link_paths: Vec::new(), header };
         cfg.emit_cfg_flags();
