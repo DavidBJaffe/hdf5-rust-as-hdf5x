@@ -700,7 +700,7 @@ mod conda_dl {
     use std::time::Duration;
 
     use bzip2::read::BzDecoder;
-    use md5;
+    use sha2::Digest;
     use tar::Archive;
 
     #[cfg(target_os = "linux")]
@@ -712,12 +712,12 @@ mod conda_dl {
             (
                 "hdf5-1.12.0-hc3cf35f_0.tar.bz2",
                 "https://anaconda.org/anaconda/hdf5/1.12.0/download/linux-64/hdf5-1.12.0-hc3cf35f_0.tar.bz2",
-                "4d6427799e77f67d12997ec4a5c62f80",
+                "1681beaec0bcbd0025731735902744ef4db6a3084d9d325d814ec9758a2da31c",
             ),
             (
                 "zlib-1.2.11-hfbfcf68_1.tar.bz2",
                 "https://repo.continuum.io/pkgs/main/linux-64/zlib-1.2.11-hfbfcf68_1.tar.bz2",
-                "cb3dfd6392fcc03474b8d71cf8f0b264",
+                "97c9bd774d08dcc6383c297e4378e1486061e7af426f3e62fda449454de7defb",
             ),
         ];
     }
@@ -731,12 +731,12 @@ mod conda_dl {
             (
                 "hdf5-1.12.0-h964e04d_0.tar.bz2",
                 "https://anaconda.org/anaconda/hdf5/1.12.0/download/osx-64/hdf5-1.12.0-h964e04d_0.tar.bz2",
-                "068d24073061c0c6e70cc222eb500ff5",
+                "1d6e4058ab8ad0ea70dd755b62310a956f9a026ab6a3336ff4bd605c806d7c60",
             ),
             (
                 "zlib-1.2.11-hf3cbc9b_2.tar.bz2",
                 "https://repo.continuum.io/pkgs/main/osx-64/zlib-1.2.11-hf3cbc9b_2.tar.bz2",
-                "f77c7d05dc47868e181135af65cb6e26",
+                "a82e1e2900b095f50ab7b126f31a6fe5caab0f1cb31a7bba45451df47aba0dd6",
             ),
         ];
     }
@@ -750,12 +750,12 @@ mod conda_dl {
             (
                 "hdf5-1.12.0-h1756f20_0.tar.bz2",
                 "https://anaconda.org/anaconda/hdf5/1.12.0/download/win-64/hdf5-1.12.0-h1756f20_0.tar.bz2",
-                "5446b521e768ec0ea14d0c52ddbca8ff",
+                "747997999fc56b5c878cc8ee224b486266ac1c77ddf8407529a91eb851abf3d7",
             ),
             (
                 "zlib-1.2.11-vc14h1cdd9ab_1.tar.bz2",
                 "https://repo.continuum.io/pkgs/main/win-64/zlib-1.2.11-vc14h1cdd9ab_1.tar.bz2",
-                "4e2394286375c49f880e159a7efae05f",
+                "cf7f895c0ff7f238ed02182a89864386bfc198674dc280002ff4a47ae0993b0e",
             ),
         ];
     }
@@ -778,12 +778,12 @@ mod conda_dl {
         response.write_to(writer).unwrap();
     }
 
-    fn calc_md5(path: &Path) -> String {
+    fn calc_sha256(path: &Path) -> String {
         let mut f = io::BufReader::new(fs::File::open(path).unwrap());
         let mut buf = Vec::new();
         f.read_to_end(&mut buf).unwrap();
 
-        let digest = md5::compute(&buf);
+        let digest = sha2::Sha256::digest(&buf);
         format!("{:x}", digest)
     }
 
@@ -797,18 +797,21 @@ mod conda_dl {
     pub fn conda_static() {
         let out_dir = PathBuf::from(env::var("OUT_DIR").unwrap());
 
-        for (archive, uri, md5) in conda::DLS {
+        for (archive, uri, sha256) in conda::DLS {
             let archive_path = out_dir.join(archive);
-            if archive_path.exists() && calc_md5(&archive_path) == *md5 {
+            if archive_path.exists() && calc_sha256(&archive_path) == *sha256 {
                 println!("Use existings archive");
             } else {
                 println!("Download archive");
                 download(uri, archive, &out_dir);
                 extract(&archive_path, &out_dir);
 
-                let sum = calc_md5(&archive_path);
-                if sum != *md5 {
-                    panic!("check sum of downloaded archive is incorrect: md5sum={}", sum);
+                let sum = calc_sha256(&archive_path);
+                if sum != *sha256 {
+                    panic!(
+                        "check sum of downloaded archive {} is incorrect: sha256sum={}",
+                        archive, sum
+                    );
                 }
             }
         }
