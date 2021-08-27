@@ -3,7 +3,7 @@ use std::mem;
 use std::ops::Deref;
 
 use ndarray::{Array, Array1, Array2, ArrayD, ArrayView, ArrayView1};
-use ndarray::{SliceInfo, SliceOrIndex};
+use ndarray::{SliceInfo, SliceInfoElem};
 
 use hdf5_sys::h5a::{H5Aget_space, H5Aget_storage_size, H5Aget_type, H5Aread, H5Awrite};
 use hdf5_sys::h5d::{H5Dget_space, H5Dget_storage_size, H5Dget_type, H5Dread, H5Dwrite};
@@ -63,17 +63,20 @@ impl<'a> Reader<'a> {
     /// the slice, after singleton dimensions are dropped.
     /// Use the multi-dimensional slice macro `s![]` from `ndarray` to conveniently create
     /// a multidimensional slice.
-    pub fn read_slice<T, S, D>(&self, slice: &SliceInfo<S, D>) -> Result<Array<T, D>>
+    pub fn read_slice<T, S, Din, Dout>(
+        &self, slice: SliceInfo<S, Din, Dout>,
+    ) -> Result<Array<T, Dout>>
     where
         T: H5Type,
-        S: AsRef<[SliceOrIndex]>,
-        D: ndarray::Dimension,
+        S: AsRef<[SliceInfoElem]>,
+        Din: ndarray::Dimension,
+        Dout: ndarray::Dimension,
     {
         ensure!(!self.obj.is_attr(), "slicing cannot be used on attribute datasets");
 
         let shape = self.obj.get_shape()?;
 
-        let slice_s: &[SliceOrIndex] = slice.as_ref();
+        let slice_s: &[SliceInfoElem] = slice.as_ref();
         let slice_dim = slice_s.len();
         if shape.ndim() != slice_dim {
             let obj_ndim = shape.ndim();
@@ -87,7 +90,7 @@ impl<'a> Reader<'a> {
 
         if shape.ndim() == 0 {
             // Check that return dimensionality is 0.
-            if let Some(ndim) = D::NDIM {
+            if let Some(ndim) = Dout::NDIM {
                 let obj_ndim = 0;
                 ensure!(
                     obj_ndim == ndim,
@@ -102,22 +105,22 @@ impl<'a> Reader<'a> {
             self.read()
         } else {
             let fspace = self.obj.space()?;
-            let out_shape = fspace.select_slice(slice)?;
+            let out_shape = fspace.select_slice(&slice)?;
 
-            // Remove dimensions from out_shape that were SliceOrIndex::Index in the slice
+            // Remove dimensions from out_shape that were SliceInfoElem::Index in the slice
             let reduced_shape: Vec<_> = slice_s
                 .iter()
                 .zip(out_shape.iter().cloned())
                 .filter_map(|(slc, sz)| match slc {
-                    SliceOrIndex::Index(_) => None,
+                    SliceInfoElem::Index(_) => None,
                     _ => Some(sz),
                 })
                 .collect();
 
             // *Output* dimensionality must match the reduced shape,
-            // (i.e. dimensionality after singleton 'SliceOrIndex::Index'
+            // (i.e. dimensionality after singleton 'SliceInfoElem::Index'
             // axes are dropped.
-            if let Some(ndim) = D::NDIM {
+            if let Some(ndim) = Dout::NDIM {
                 let obj_ndim = reduced_shape.len();
                 ensure!(
                     obj_ndim == ndim,
@@ -177,10 +180,13 @@ impl<'a> Reader<'a> {
 
     /// Reads the given `slice` of the dataset into a 1-dimensional array.
     /// The slice must yield a 1-dimensional result.
-    pub fn read_slice_1d<T, S>(&self, slice: &SliceInfo<S, ndarray::Ix1>) -> Result<Array1<T>>
+    pub fn read_slice_1d<T, S, Din>(
+        &self, slice: SliceInfo<S, Din, ndarray::Ix1>,
+    ) -> Result<Array1<T>>
     where
         T: H5Type,
-        S: AsRef<[SliceOrIndex]>,
+        S: AsRef<[SliceInfoElem]>,
+        Din: ndarray::Dimension,
     {
         self.read_slice(slice)
     }
@@ -194,10 +200,13 @@ impl<'a> Reader<'a> {
 
     /// Reads the given `slice` of the dataset into a 2-dimensional array.
     /// The slice must yield a 2-dimensional result.
-    pub fn read_slice_2d<T, S>(&self, slice: &SliceInfo<S, ndarray::Ix2>) -> Result<Array2<T>>
+    pub fn read_slice_2d<T, S, Din>(
+        &self, slice: SliceInfo<S, Din, ndarray::Ix2>,
+    ) -> Result<Array2<T>>
     where
         T: H5Type,
-        S: AsRef<[SliceOrIndex]>,
+        S: AsRef<[SliceInfoElem]>,
+        Din: ndarray::Dimension,
     {
         self.read_slice(slice)
     }
@@ -265,17 +274,20 @@ impl<'a> Writer<'a> {
     /// If the array has a fixed number of dimensions, it must match the dimensionality of
     /// dataset. Use the multi-dimensional slice macro `s![]` from `ndarray` to conveniently create
     /// a multidimensional slice.
-    pub fn write_slice<'b, A, T, S, D>(&self, arr: A, slice: &SliceInfo<S, D>) -> Result<()>
+    pub fn write_slice<'b, A, T, S, Din, Dout>(
+        &self, arr: A, slice: &SliceInfo<S, Din, Dout>,
+    ) -> Result<()>
     where
-        A: Into<ArrayView<'b, T, D>>,
+        A: Into<ArrayView<'b, T, Din>>,
         T: H5Type,
-        S: AsRef<[SliceOrIndex]>,
-        D: ndarray::Dimension,
+        S: AsRef<[SliceInfoElem]>,
+        Din: ndarray::Dimension,
+        Dout: ndarray::Dimension,
     {
         ensure!(!self.obj.is_attr(), "slicing cannot be used on attribute datasets");
 
         let shape = self.obj.get_shape()?;
-        let slice_s: &[SliceOrIndex] = slice.as_ref();
+        let slice_s: &[SliceInfoElem] = slice.as_ref();
         let slice_dim = slice_s.len();
         if shape.ndim() != slice_dim {
             let obj_ndim = shape.ndim();
@@ -298,11 +310,11 @@ impl<'a> Writer<'a> {
             let view = arr.into();
             let data_shape = view.shape();
 
-            // Restore dimensions that are SliceOrIndex::Index in the slice.
+            // Restore dimensions that are SliceInfoElem::Index in the slice.
             let mut data_shape_hydrated = Vec::new();
             let mut pos = 0;
             for s in slice_s {
-                if let SliceOrIndex::Index(_) = s {
+                if let SliceInfoElem::Index(_) = s {
                     data_shape_hydrated.push(1);
                 } else {
                     data_shape_hydrated.push(data_shape[pos]);
@@ -512,10 +524,12 @@ impl Container {
 
     /// Reads the given `slice` of the dataset into a 1-dimensional array.
     /// The slice must yield a 1-dimensional result.
-    pub fn read_slice_1d<T, S>(&self, slice: &SliceInfo<S, ndarray::Ix1>) -> Result<Array1<T>>
+    pub fn read_slice_1d<T, S>(
+        &self, slice: SliceInfo<S, ndarray::Ix1, ndarray::Ix1>,
+    ) -> Result<Array1<T>>
     where
         T: H5Type,
-        S: AsRef<[SliceOrIndex]>,
+        S: AsRef<[SliceInfoElem]>,
     {
         self.as_reader().read_slice_1d(slice)
     }
@@ -529,10 +543,12 @@ impl Container {
 
     /// Reads the given `slice` of the dataset into a 2-dimensional array.
     /// The slice must yield a 2-dimensional result.
-    pub fn read_slice_2d<T, S>(&self, slice: &SliceInfo<S, ndarray::Ix2>) -> Result<Array2<T>>
+    pub fn read_slice_2d<T, S>(
+        &self, slice: SliceInfo<S, ndarray::Ix2, ndarray::Ix2>,
+    ) -> Result<Array2<T>>
     where
         T: H5Type,
-        S: AsRef<[SliceOrIndex]>,
+        S: AsRef<[SliceInfoElem]>,
     {
         self.as_reader().read_slice_2d(slice)
     }
@@ -547,11 +563,14 @@ impl Container {
     /// the slice, after singleton dimensions are dropped.
     /// Use the multi-dimensional slice macro `s![]` from `ndarray` to conveniently create
     /// a multidimensional slice.
-    pub fn read_slice<T, S, D>(&self, slice: &SliceInfo<S, D>) -> Result<Array<T, D>>
+    pub fn read_slice<T, S, Din, Dout>(
+        &self, slice: SliceInfo<S, Din, Dout>,
+    ) -> Result<Array<T, Dout>>
     where
         T: H5Type,
-        S: AsRef<[SliceOrIndex]>,
-        D: ndarray::Dimension,
+        S: AsRef<[SliceInfoElem]>,
+        Din: ndarray::Dimension,
+        Dout: ndarray::Dimension,
     {
         self.as_reader().read_slice(slice)
     }
@@ -592,12 +611,15 @@ impl Container {
     /// If the array has a fixed number of dimensions, it must match the dimensionality of
     /// dataset. Use the multi-dimensional slice macro `s![]` from `ndarray` to conveniently create
     /// a multidimensional slice.
-    pub fn write_slice<'b, A, T, S, D>(&self, arr: A, slice: &SliceInfo<S, D>) -> Result<()>
+    pub fn write_slice<'b, A, T, S, Din, Dout>(
+        &self, arr: A, slice: &SliceInfo<S, Din, Dout>,
+    ) -> Result<()>
     where
-        A: Into<ArrayView<'b, T, D>>,
+        A: Into<ArrayView<'b, T, Din>>,
         T: H5Type,
-        S: AsRef<[SliceOrIndex]>,
-        D: ndarray::Dimension,
+        S: AsRef<[SliceInfoElem]>,
+        Din: ndarray::Dimension,
+        Dout: ndarray::Dimension,
     {
         self.as_writer().write_slice(arr, slice)
     }

@@ -3,7 +3,7 @@ use std::fmt::{self, Debug};
 use std::ops::Deref;
 use std::ptr;
 
-use ndarray::SliceOrIndex;
+use ndarray::SliceInfoElem;
 
 use hdf5_sys::h5s::{
     H5Scopy, H5Screate_simple, H5Sget_simple_extent_dims, H5Sget_simple_extent_ndims,
@@ -64,10 +64,10 @@ impl Dataspace {
     /// Useful when you want to read a subset of a dataset.
     pub fn select_slice<S>(&self, slice: S) -> Result<Vec<Ix>>
     where
-        S: AsRef<[SliceOrIndex]>,
+        S: AsRef<[SliceInfoElem]>,
     {
         let shape = self.dims();
-        let ss: &[SliceOrIndex] = slice.as_ref();
+        let ss: &[SliceInfoElem] = slice.as_ref();
 
         let mut start_vec = Vec::with_capacity(ss.len());
         let mut stride_vec = Vec::with_capacity(ss.len());
@@ -93,9 +93,9 @@ impl Dataspace {
         Ok(shape_vec)
     }
 
-    fn get_start_stride_count(v: &SliceOrIndex, len: Ix) -> Result<(u64, u64, u64)> {
+    fn get_start_stride_count(v: &SliceInfoElem, len: Ix) -> Result<(u64, u64, u64)> {
         match v {
-            SliceOrIndex::Slice { start, end, step } => {
+            SliceInfoElem::Slice { start, end, step } => {
                 let end = end.unwrap_or(len as isize);
                 ensure!(end <= len as _, "slice extends beyond dataspace bounds");
                 ensure!(*step >= 1, "step must be >= 1 (got {})", step);
@@ -108,7 +108,8 @@ impl Dataspace {
 
                 Ok((*start as u64, *step as u64, count as u64))
             }
-            SliceOrIndex::Index(v) => Ok((*v as u64, 1, 1)),
+            SliceInfoElem::Index(v) => Ok((*v as u64, 1, 1)),
+            &SliceInfoElem::NewAxis => panic!("slice extends beyond dataspace bounds"),
         }
     }
 

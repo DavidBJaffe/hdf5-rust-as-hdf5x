@@ -1,3 +1,4 @@
+use std::convert::TryFrom;
 use std::fmt;
 
 use ndarray::{s, Array1, Array2, ArrayD, IxDyn, SliceInfo};
@@ -60,7 +61,7 @@ where
         let slice = gen_slice(rng, shape);
 
         // Do a sliced HDF5 read
-        let sliced_read: ArrayD<T> = dsr.read_slice(&slice).unwrap();
+        let sliced_read: ArrayD<T> = dsr.read_slice(slice.clone()).unwrap();
 
         // Slice the full dataset
         let sliced_dataset = arr.slice(slice.as_ref());
@@ -76,9 +77,10 @@ where
     let mut bad_shape = Vec::from(shape);
     bad_shape.push(1);
     let bad_slice = gen_slice(rng, &bad_shape);
-    let bad_slice: SliceInfo<_, IxDyn> = ndarray::SliceInfo::new(bad_slice.as_slice()).unwrap();
+    let bad_slice: SliceInfo<_, IxDyn, IxDyn> =
+        ndarray::SliceInfo::try_from(bad_slice.as_slice()).unwrap();
 
-    let bad_sliced_read: hdf5::Result<ArrayD<T>> = dsr.read_slice(&bad_slice);
+    let bad_sliced_read: hdf5::Result<ArrayD<T>> = dsr.read_slice(bad_slice.clone());
     assert!(bad_sliced_read.is_err());
 
     // Tests for dimension-dropping slices with static dimensionality.
