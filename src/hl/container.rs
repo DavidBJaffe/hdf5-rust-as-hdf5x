@@ -64,7 +64,7 @@ impl<'a> Reader<'a> {
     /// Use the multi-dimensional slice macro `s![]` from `ndarray` to conveniently create
     /// a multidimensional slice.
     pub fn read_slice<T, S, Din, Dout>(
-        &self, slice: &SliceInfo<S, Din, Dout>,
+        &self, slice: SliceInfo<S, Din, Dout>,
     ) -> Result<Array<T, Dout>>
     where
         T: H5Type,
@@ -105,7 +105,7 @@ impl<'a> Reader<'a> {
             self.read()
         } else {
             let fspace = self.obj.space()?;
-            let out_shape = fspace.select_slice(slice)?;
+            let out_shape = fspace.select_slice(&slice)?;
 
             // Remove dimensions from out_shape that were SliceInfoElem::Index in the slice
             let reduced_shape: Vec<_> = slice_s
@@ -181,7 +181,7 @@ impl<'a> Reader<'a> {
     /// Reads the given `slice` of the dataset into a 1-dimensional array.
     /// The slice must yield a 1-dimensional result.
     pub fn read_slice_1d<T, S, Din>(
-        &self, slice: &SliceInfo<S, Din, ndarray::Ix1>,
+        &self, slice: SliceInfo<S, Din, ndarray::Ix1>,
     ) -> Result<Array1<T>>
     where
         T: H5Type,
@@ -201,7 +201,7 @@ impl<'a> Reader<'a> {
     /// Reads the given `slice` of the dataset into a 2-dimensional array.
     /// The slice must yield a 2-dimensional result.
     pub fn read_slice_2d<T, S, Din>(
-        &self, slice: &SliceInfo<S, Din, ndarray::Ix2>,
+        &self, slice: SliceInfo<S, Din, ndarray::Ix2>,
     ) -> Result<Array2<T>>
     where
         T: H5Type,
@@ -525,7 +525,7 @@ impl Container {
     /// Reads the given `slice` of the dataset into a 1-dimensional array.
     /// The slice must yield a 1-dimensional result.
     pub fn read_slice_1d<T, S>(
-        &self, slice: &SliceInfo<S, ndarray::Ix1, ndarray::Ix1>,
+        &self, slice: SliceInfo<S, ndarray::Ix1, ndarray::Ix1>,
     ) -> Result<Array1<T>>
     where
         T: H5Type,
@@ -544,7 +544,7 @@ impl Container {
     /// Reads the given `slice` of the dataset into a 2-dimensional array.
     /// The slice must yield a 2-dimensional result.
     pub fn read_slice_2d<T, S>(
-        &self, slice: &SliceInfo<S, ndarray::Ix2, ndarray::Ix2>,
+        &self, slice: SliceInfo<S, ndarray::Ix2, ndarray::Ix2>,
     ) -> Result<Array2<T>>
     where
         T: H5Type,
@@ -564,7 +564,7 @@ impl Container {
     /// Use the multi-dimensional slice macro `s![]` from `ndarray` to conveniently create
     /// a multidimensional slice.
     pub fn read_slice<T, S, Din, Dout>(
-        &self, slice: &SliceInfo<S, Din, Dout>,
+        &self, slice: SliceInfo<S, Din, Dout>,
     ) -> Result<Array<T, Dout>>
     where
         T: H5Type,

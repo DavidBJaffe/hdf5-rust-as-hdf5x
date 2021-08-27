@@ -61,7 +61,7 @@ where
         let slice = gen_slice(rng, shape);
 
         // Do a sliced HDF5 read
-        let sliced_read: ArrayD<T> = dsr.read_slice(&slice).unwrap();
+        let sliced_read: ArrayD<T> = dsr.read_slice(slice.clone()).unwrap();
 
         // Slice the full dataset
         let sliced_dataset = arr.slice(slice.as_ref());
@@ -80,24 +80,24 @@ where
     let bad_slice: SliceInfo<_, IxDyn, IxDyn> =
         ndarray::SliceInfo::try_from(bad_slice.as_slice()).unwrap();
 
-    let bad_sliced_read: hdf5::Result<ArrayD<T>> = dsr.read_slice(&bad_slice);
+    let bad_sliced_read: hdf5::Result<ArrayD<T>> = dsr.read_slice(bad_slice.clone());
     assert!(bad_sliced_read.is_err());
 
     // Tests for dimension-dropping slices with static dimensionality.
     if ndim == 2 && shape[0] > 0 && shape[1] > 0 {
-        let v: Array1<T> = dsr.read_slice_1d(&s![0, ..])?;
+        let v: Array1<T> = dsr.read_slice_1d(s![0, ..])?;
         assert_eq!(shape[1], v.shape()[0]);
 
-        let v: Array1<T> = dsr.read_slice_1d(&s![.., 0])?;
+        let v: Array1<T> = dsr.read_slice_1d(s![.., 0])?;
         assert_eq!(shape[0], v.shape()[0]);
     }
 
     if ndim == 3 && shape[0] > 0 && shape[1] > 0 && shape[2] > 0 {
-        let v: Array2<T> = dsr.read_slice_2d(&s![0, .., ..])?;
+        let v: Array2<T> = dsr.read_slice_2d(s![0, .., ..])?;
         assert_eq!(shape[1], v.shape()[0]);
         assert_eq!(shape[2], v.shape()[1]);
 
-        let v: Array1<T> = dsr.read_slice_1d(&s![0, 0, ..])?;
+        let v: Array1<T> = dsr.read_slice_1d(s![0, 0, ..])?;
         assert_eq!(shape[2], v.shape()[0]);
     }
 
