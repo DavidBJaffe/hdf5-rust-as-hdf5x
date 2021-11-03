@@ -752,12 +752,12 @@ mod conda_dl {
             (
                 "hdf5-1.12.1-nompi_had0e5e0_101.tar.bz2",
                 "https://anaconda.org/conda-forge/hdf5/1.12.1/download/osx-arm64/hdf5-1.12.1-nompi_had0e5e0_101.tar.bz2",
-                "2f86f9bc41e7d1ed0f81f0eb7955b1b7",
+                "479a943c508ea796b708d4eaaa6bf03b5168c877a454190d67a75f28a44a2461",
             ),
             (
                 "zlib-1.2.11-hee7b306_1013.tar.bz2",
                 "https://anaconda.org/conda-forge/zlib/1.2.11/download/osx-arm64/zlib-1.2.11-hee7b306_1013.tar.bz2",
-                "0b65c3db409dd06257dd879605eddb45",
+                "04cbcc43aaf9b1ba31eddb0a93adb1a025156542fd4ba2b7b66b4ba4f4126d50",
             ),
         ];
     }
