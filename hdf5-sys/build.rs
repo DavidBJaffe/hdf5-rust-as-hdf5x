@@ -38,7 +38,7 @@ impl Version {
         self.major == 1
             && ((self.minor == 8 && self.micro >= 4)
                 || (self.minor == 10)
-                || (self.minor == 12 && self.micro == 0))
+                || (self.minor == 12 && self.micro <= 1))
     }
 }
 
