@@ -724,7 +724,7 @@ mod conda_dl {
         ];
     }
 
-    #[cfg(target_os = "macos")]
+    #[cfg(all(target_os = "macos", target_arch = "x86_64"))]
     mod conda {
         pub const INC_PATH: &'static str = "include";
         pub const LIB_PATH: &'static str = "lib";
@@ -739,6 +739,25 @@ mod conda_dl {
                 "zlib-1.2.11-hf3cbc9b_2.tar.bz2",
                 "https://repo.continuum.io/pkgs/main/osx-64/zlib-1.2.11-hf3cbc9b_2.tar.bz2",
                 "a82e1e2900b095f50ab7b126f31a6fe5caab0f1cb31a7bba45451df47aba0dd6",
+            ),
+        ];
+    }
+
+    #[cfg(all(target_os = "macos", target_arch = "aarch64"))]
+    mod conda {
+        pub const INC_PATH: &'static str = "include";
+        pub const LIB_PATH: &'static str = "lib";
+
+        pub const DLS: &[(&'static str, &'static str, &'static str)] = &[
+            (
+                "hdf5-1.12.1-nompi_had0e5e0_101.tar.bz2",
+                "https://anaconda.org/conda-forge/hdf5/1.12.1/download/osx-arm64/hdf5-1.12.1-nompi_had0e5e0_101.tar.bz2",
+                "2f86f9bc41e7d1ed0f81f0eb7955b1b7",
+            ),
+            (
+                "zlib-1.2.11-hee7b306_1013.tar.bz2",
+                "https://anaconda.org/conda-forge/zlib/1.2.11/download/osx-arm64/zlib-1.2.11-hee7b306_1013.tar.bz2",
+                "0b65c3db409dd06257dd879605eddb45",
             ),
         ];
     }
