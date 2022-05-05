@@ -3,17 +3,17 @@ use std::ops::Deref;
 
 use ndarray::{self, ArrayView};
 
-use hdf5_sys::h5::HADDR_UNDEF;
-use hdf5_sys::h5d::{
+use hdf5x_sys::h5::HADDR_UNDEF;
+use hdf5x_sys::h5d::{
     H5Dcreate2, H5Dcreate_anon, H5Dget_access_plist, H5Dget_create_plist, H5Dget_offset,
     H5Dset_extent,
 };
 #[cfg(feature = "1.10.5")]
-use hdf5_sys::h5d::{H5Dget_chunk_info, H5Dget_num_chunks};
-use hdf5_sys::h5l::H5Ldelete;
-use hdf5_sys::h5p::H5P_DEFAULT;
-use hdf5_sys::h5z::H5Z_filter_t;
-use hdf5_types::{OwnedDynValue, TypeDescriptor};
+use hdf5x_sys::h5d::{H5Dget_chunk_info, H5Dget_num_chunks};
+use hdf5x_sys::h5l::H5Ldelete;
+use hdf5x_sys::h5p::H5P_DEFAULT;
+use hdf5x_sys::h5z::H5Z_filter_t;
+use hdf5x_types::{OwnedDynValue, TypeDescriptor};
 
 #[cfg(feature = "blosc")]
 use crate::hl::filters::{Blosc, BloscShuffle};

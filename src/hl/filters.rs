@@ -1,12 +1,12 @@
 use std::collections::HashMap;
 use std::ptr;
 
-use hdf5_sys::h5p::{
+use hdf5x_sys::h5p::{
     H5Pget_filter2, H5Pget_nfilters, H5Pset_deflate, H5Pset_filter, H5Pset_fletcher32, H5Pset_nbit,
     H5Pset_scaleoffset, H5Pset_shuffle, H5Pset_szip,
 };
-use hdf5_sys::h5t::H5T_class_t;
-use hdf5_sys::h5z::{
+use hdf5x_sys::h5t::H5T_class_t;
+use hdf5x_sys::h5z::{
     H5Z_filter_t, H5Zfilter_avail, H5Zget_filter_info, H5Z_FILTER_CONFIG_DECODE_ENABLED,
     H5Z_FILTER_CONFIG_ENCODE_ENABLED, H5Z_FILTER_DEFLATE, H5Z_FILTER_FLETCHER32, H5Z_FILTER_NBIT,
     H5Z_FILTER_SCALEOFFSET, H5Z_FILTER_SHUFFLE, H5Z_FILTER_SZIP, H5Z_FLAG_OPTIONAL,
@@ -117,7 +117,7 @@ pub struct FilterInfo {
     pub decode_enabled: bool,
 }
 
-/// This function requires a synchronisation with other calls to `hdf5`
+/// This function requires a synchronisation with other calls to `hdf5x`
 pub(crate) fn register_filters() {
     #[cfg(feature = "lzf")]
     if let Err(e) = lzf::register_lzf() {

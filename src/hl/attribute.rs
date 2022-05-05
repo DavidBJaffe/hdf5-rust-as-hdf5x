@@ -1,11 +1,11 @@
 use std::fmt::{self, Debug};
 use std::ops::Deref;
 
-use hdf5_sys::{
+use hdf5x_sys::{
     h5::{H5_index_t, H5_iter_order_t},
     h5a::{H5A_info_t, H5A_operator2_t, H5Acreate2, H5Adelete, H5Aiterate2},
 };
-use hdf5_types::TypeDescriptor;
+use hdf5x_types::TypeDescriptor;
 use ndarray::ArrayView;
 
 use crate::internal_prelude::*;

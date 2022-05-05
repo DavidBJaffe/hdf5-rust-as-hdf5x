@@ -3,12 +3,12 @@
 //! This crate provides thread-safe Rust bindings and high-level wrappers for the `HDF5`
 //! library API. Some of the features include:
 //!
-//! - Thread-safety with non-threadsafe libhdf5 builds guaranteed via reentrant mutexes.
+//! - Thread-safety with non-threadsafe libhdf5x builds guaranteed via reentrant mutexes.
 //! - Native representation of most HDF5 types, including variable-length strings and arrays.
 //! - Derive-macro for automatic mapping of user structs and enums to `HDF5` types.
 //! - Multi-dimensional array reading/writing interface via `ndarray`.
 //!
-//! Direct low-level bindings are also available and provided in the `hdf5-sys` crate.
+//! Direct low-level bindings are also available and provided in the `hdf5x-sys` crate.
 //!
 //! Requires `HDF5` library of version 1.8.4 or later. Newer versions will enable additional
 //! features of the library. Such items are marked in the documentation with a version number
@@ -66,11 +66,11 @@ mod export {
     #[doc(hidden)]
     pub use crate::error::h5check;
 
-    pub use hdf5_derive::H5Type;
-    pub use hdf5_types::H5Type;
+    pub use hdf5x_derive::H5Type;
+    pub use hdf5x_types::H5Type;
 
     pub mod types {
-        pub use hdf5_types::*;
+        pub use hdf5x_types::*;
     }
 
     pub mod dataset {
@@ -142,7 +142,7 @@ mod internal_prelude {
     pub use libc::size_t;
     pub use std::os::raw::{c_char, c_double, c_int, c_long, c_uint, c_void};
 
-    pub use hdf5_sys::{
+    pub use hdf5x_sys::{
         h5::{haddr_t, hbool_t, herr_t, hsize_t},
         h5i::H5I_type_t::{self, *},
         h5i::{hid_t, H5I_INVALID_HID},
@@ -174,7 +174,7 @@ pub mod test;
 /// Returns the runtime version of the HDF5 library.
 pub fn library_version() -> (u8, u8, u8) {
     use self::internal_prelude::c_uint;
-    use hdf5_sys::h5::H5get_libversion;
+    use hdf5x_sys::h5::H5get_libversion;
     let mut v: (c_uint, c_uint, c_uint) = (0, 0, 0);
     h5call!(H5get_libversion(&mut v.0, &mut v.1, &mut v.2))
         .map(|_| (v.0 as _, v.1 as _, v.2 as _))
@@ -186,7 +186,7 @@ pub fn is_library_threadsafe() -> bool {
     #[cfg(feature = "1.8.16")]
     {
         use self::internal_prelude::hbool_t;
-        use hdf5_sys::h5::H5is_library_threadsafe;
+        use hdf5x_sys::h5::H5is_library_threadsafe;
         let mut ts: hbool_t = 0;
         h5call!(H5is_library_threadsafe(&mut ts)).map(|_| ts > 0).unwrap_or(false)
     }

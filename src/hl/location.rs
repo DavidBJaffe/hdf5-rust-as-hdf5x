@@ -4,20 +4,20 @@ use std::ops::Deref;
 use std::ptr;
 
 #[allow(deprecated)]
-use hdf5_sys::h5o::H5Oset_comment;
+use hdf5x_sys::h5o::H5Oset_comment;
 #[cfg(feature = "1.12.0")]
-use hdf5_sys::h5o::{
+use hdf5x_sys::h5o::{
     H5O_info2_t, H5O_token_t, H5Oget_info3, H5Oget_info_by_name3, H5Oopen_by_token,
 };
 #[cfg(not(feature = "1.10.3"))]
-use hdf5_sys::h5o::{H5Oget_info1, H5Oget_info_by_name1};
+use hdf5x_sys::h5o::{H5Oget_info1, H5Oget_info_by_name1};
 #[cfg(all(feature = "1.10.3", not(feature = "1.12.0")))]
-use hdf5_sys::h5o::{H5Oget_info2, H5Oget_info_by_name2};
+use hdf5x_sys::h5o::{H5Oget_info2, H5Oget_info_by_name2};
 #[cfg(feature = "1.10.3")]
-use hdf5_sys::h5o::{H5O_INFO_BASIC, H5O_INFO_NUM_ATTRS, H5O_INFO_TIME};
+use hdf5x_sys::h5o::{H5O_INFO_BASIC, H5O_INFO_NUM_ATTRS, H5O_INFO_TIME};
 #[cfg(not(feature = "1.12.0"))]
-use hdf5_sys::{h5::haddr_t, h5o::H5O_info1_t, h5o::H5Oopen_by_addr};
-use hdf5_sys::{
+use hdf5x_sys::{h5::haddr_t, h5o::H5O_info1_t, h5o::H5Oopen_by_addr};
+use hdf5x_sys::{
     h5a::H5Aopen,
     h5f::H5Fget_name,
     h5i::{H5Iget_file_id, H5Iget_name},

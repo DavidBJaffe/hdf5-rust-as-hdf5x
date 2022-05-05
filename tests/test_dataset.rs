@@ -4,7 +4,7 @@ use std::fmt;
 use ndarray::{s, Array1, Array2, ArrayD, IxDyn, SliceInfo};
 use rand::prelude::{Rng, SeedableRng, SmallRng};
 
-use hdf5_types::TypeDescriptor;
+use hdf5x_types::TypeDescriptor;
 
 mod common;
 
@@ -12,10 +12,10 @@ use self::common::gen::{gen_arr, gen_slice, Enum, FixedStruct, Gen, TupleStruct,
 use self::common::util::new_in_memory_file;
 
 fn test_write_slice<T, R>(
-    rng: &mut R, ds: &hdf5::Dataset, arr: &ArrayD<T>, default_value: &T, _ndim: usize,
-) -> hdf5::Result<()>
+    rng: &mut R, ds: &hdf5x::Dataset, arr: &ArrayD<T>, default_value: &T, _ndim: usize,
+) -> hdf5x::Result<()>
 where
-    T: hdf5::H5Type + fmt::Debug + PartialEq + Gen + Clone,
+    T: hdf5x::H5Type + fmt::Debug + PartialEq + Gen + Clone,
     R: Rng + ?Sized,
 {
     let shape = arr.shape();
@@ -41,10 +41,10 @@ where
 }
 
 fn test_read_slice<T, R>(
-    rng: &mut R, ds: &hdf5::Dataset, arr: &ArrayD<T>, ndim: usize,
-) -> hdf5::Result<()>
+    rng: &mut R, ds: &hdf5x::Dataset, arr: &ArrayD<T>, ndim: usize,
+) -> hdf5x::Result<()>
 where
-    T: hdf5::H5Type + fmt::Debug + PartialEq + Gen,
+    T: hdf5x::H5Type + fmt::Debug + PartialEq + Gen,
     R: Rng + ?Sized,
 {
     ds.write(arr)?;
@@ -80,7 +80,7 @@ where
     let bad_slice: SliceInfo<_, IxDyn, IxDyn> =
         ndarray::SliceInfo::try_from(bad_slice.as_slice()).unwrap();
 
-    let bad_sliced_read: hdf5::Result<ArrayD<T>> = dsr.read_slice(bad_slice);
+    let bad_sliced_read: hdf5x::Result<ArrayD<T>> = dsr.read_slice(bad_slice);
     assert!(bad_sliced_read.is_err());
 
     // Tests for dimension-dropping slices with static dimensionality.
@@ -104,9 +104,9 @@ where
     Ok(())
 }
 
-fn test_read<T>(ds: &hdf5::Dataset, arr: &ArrayD<T>, ndim: usize) -> hdf5::Result<()>
+fn test_read<T>(ds: &hdf5x::Dataset, arr: &ArrayD<T>, ndim: usize) -> hdf5x::Result<()>
 where
-    T: hdf5::H5Type + fmt::Debug + PartialEq + Gen,
+    T: hdf5x::H5Type + fmt::Debug + PartialEq + Gen,
 {
     ds.write(arr)?;
 
@@ -145,9 +145,9 @@ where
     Ok(())
 }
 
-fn test_write<T>(ds: &hdf5::Dataset, arr: &ArrayD<T>, ndim: usize) -> hdf5::Result<()>
+fn test_write<T>(ds: &hdf5x::Dataset, arr: &ArrayD<T>, ndim: usize) -> hdf5x::Result<()>
 where
-    T: hdf5::H5Type + fmt::Debug + PartialEq + Gen,
+    T: hdf5x::H5Type + fmt::Debug + PartialEq + Gen,
 {
     // .write()
     ds.write(arr)?;
@@ -168,9 +168,9 @@ where
     Ok(())
 }
 
-fn test_read_write<T>() -> hdf5::Result<()>
+fn test_read_write<T>() -> hdf5x::Result<()>
 where
-    T: hdf5::H5Type + fmt::Debug + PartialEq + Gen + Clone,
+    T: hdf5x::H5Type + fmt::Debug + PartialEq + Gen + Clone,
 {
     let td = T::type_descriptor();
     let mut packed = vec![false];
@@ -187,7 +187,7 @@ where
                 for mode in 0..4 {
                     let arr: ArrayD<T> = gen_arr(&mut rng, ndim);
 
-                    let ds: hdf5::Dataset =
+                    let ds: hdf5x::Dataset =
                         file.new_dataset::<T>().packed(*packed).shape(arr.shape()).create("x")?;
                     let ds = scopeguard::guard(ds, |ds| {
                         drop(ds);
@@ -213,7 +213,7 @@ where
 }
 
 #[test]
-fn test_read_write_primitive() -> hdf5::Result<()> {
+fn test_read_write_primitive() -> hdf5x::Result<()> {
     test_read_write::<i8>()?;
     test_read_write::<i16>()?;
     test_read_write::<i32>()?;
@@ -231,27 +231,27 @@ fn test_read_write_primitive() -> hdf5::Result<()> {
 }
 
 #[test]
-fn test_read_write_enum() -> hdf5::Result<()> {
+fn test_read_write_enum() -> hdf5x::Result<()> {
     test_read_write::<Enum>()
 }
 
 #[test]
-fn test_read_write_tuple_struct() -> hdf5::Result<()> {
+fn test_read_write_tuple_struct() -> hdf5x::Result<()> {
     test_read_write::<TupleStruct>()
 }
 
 #[test]
-fn test_read_write_fixed_struct() -> hdf5::Result<()> {
+fn test_read_write_fixed_struct() -> hdf5x::Result<()> {
     test_read_write::<FixedStruct>()
 }
 
 #[test]
-fn test_read_write_varlen_struct() -> hdf5::Result<()> {
+fn test_read_write_varlen_struct() -> hdf5x::Result<()> {
     test_read_write::<VarLenStruct>()
 }
 
 #[test]
-fn test_read_write_tuples() -> hdf5::Result<()> {
+fn test_read_write_tuples() -> hdf5x::Result<()> {
     test_read_write::<(u8,)>()?;
     test_read_write::<(u64, f32)>()?;
     test_read_write::<(i8, u64, f32)>()?;

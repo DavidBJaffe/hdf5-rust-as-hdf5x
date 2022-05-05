@@ -1,10 +1,10 @@
 #[macro_use]
 mod common;
 
-use hdf5::types::{TypeDescriptor as TD, *};
-use hdf5::{from_id, Datatype, H5Type};
+use hdf5x::types::{TypeDescriptor as TD, *};
+use hdf5x::{from_id, Datatype, H5Type};
 
-use hdf5_sys::h5i::H5I_INVALID_HID;
+use hdf5x_sys::h5i::H5I_INVALID_HID;
 
 macro_rules! check_roundtrip {
     ($ty:ty, $desc:expr) => {{

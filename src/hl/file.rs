@@ -3,7 +3,7 @@ use std::mem;
 use std::ops::Deref;
 use std::path::Path;
 
-use hdf5_sys::h5f::{
+use hdf5x_sys::h5f::{
     H5Fclose, H5Fcreate, H5Fflush, H5Fget_access_plist, H5Fget_create_plist, H5Fget_filesize,
     H5Fget_freespace, H5Fget_intent, H5Fget_obj_count, H5Fget_obj_ids, H5Fopen, H5F_ACC_DEFAULT,
     H5F_ACC_EXCL, H5F_ACC_RDONLY, H5F_ACC_RDWR, H5F_ACC_TRUNC, H5F_SCOPE_LOCAL,
@@ -486,7 +486,7 @@ pub mod tests {
     }
 
     fn rc(id: hid_t) -> Result<hsize_t> {
-        h5call!(hdf5_sys::h5i::H5Iget_ref(id)).map(|x| x as _)
+        h5call!(hdf5x_sys::h5i::H5Iget_ref(id)).map(|x| x as _)
     }
 
     #[test]

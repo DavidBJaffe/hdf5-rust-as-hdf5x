@@ -1,9 +1,9 @@
 use std::mem;
 use std::str::FromStr;
 
-use hdf5::dataset::*;
-use hdf5::file::*;
-use hdf5::plist::*;
+use hdf5x::dataset::*;
+use hdf5x::file::*;
+use hdf5x::plist::*;
 
 macro_rules! test_pl {
     ($ty:ident, $field:ident ($($arg:expr),+): $($name:ident=$value:expr),+) => (
@@ -73,14 +73,14 @@ type FC = FileCreate;
 type FCB = FileCreateBuilder;
 
 #[test]
-fn test_fcpl_common() -> hdf5::Result<()> {
+fn test_fcpl_common() -> hdf5x::Result<()> {
     test_pl_common!(FC, PropertyListClass::FileCreate, |b: &mut FCB| b.userblock(2048).finish());
     Ok(())
 }
 
 #[test]
-fn test_fcpl_sizes() -> hdf5::Result<()> {
-    use hdf5_sys::h5::hsize_t;
+fn test_fcpl_sizes() -> hdf5x::Result<()> {
+    use hdf5x_sys::h5::hsize_t;
     let fcpl = FileCreate::try_new()?;
     assert_eq!(fcpl.sizes().sizeof_addr, mem::size_of::<hsize_t>());
     assert_eq!(fcpl.sizes().sizeof_size, mem::size_of::<hsize_t>());
@@ -88,35 +88,35 @@ fn test_fcpl_sizes() -> hdf5::Result<()> {
 }
 
 #[test]
-fn test_fcpl_set_userblock() -> hdf5::Result<()> {
+fn test_fcpl_set_userblock() -> hdf5x::Result<()> {
     test_pl!(FC, userblock: 0);
     test_pl!(FC, userblock: 4096);
     Ok(())
 }
 
 #[test]
-fn test_fcpl_set_sym_k() -> hdf5::Result<()> {
+fn test_fcpl_set_sym_k() -> hdf5x::Result<()> {
     test_pl!(FC, sym_k: tree_rank = 17, node_size = 5);
     test_pl!(FC, sym_k: tree_rank = 18, node_size = 6);
     Ok(())
 }
 
 #[test]
-fn test_fcpl_set_istore_k() -> hdf5::Result<()> {
+fn test_fcpl_set_istore_k() -> hdf5x::Result<()> {
     test_pl!(FC, istore_k: 33);
     test_pl!(FC, istore_k: 123);
     Ok(())
 }
 
 #[test]
-fn test_fcpl_set_shared_mesg_change() -> hdf5::Result<()> {
+fn test_fcpl_set_shared_mesg_change() -> hdf5x::Result<()> {
     test_pl!(FC, shared_mesg_phase_change: max_list = 51, min_btree = 41);
     test_pl!(FC, shared_mesg_phase_change: max_list = 52, min_btree = 42);
     Ok(())
 }
 
 #[test]
-fn test_fcpl_set_shared_mesg_indexes() -> hdf5::Result<()> {
+fn test_fcpl_set_shared_mesg_indexes() -> hdf5x::Result<()> {
     let idx = vec![SharedMessageIndex {
         message_types: SharedMessageType::ATTRIBUTE,
         min_message_size: 16,
@@ -128,7 +128,7 @@ fn test_fcpl_set_shared_mesg_indexes() -> hdf5::Result<()> {
 }
 
 #[test]
-fn test_fcpl_obj_track_times() -> hdf5::Result<()> {
+fn test_fcpl_obj_track_times() -> hdf5x::Result<()> {
     assert_eq!(FC::try_new()?.get_obj_track_times()?, true);
     assert_eq!(FC::try_new()?.obj_track_times(), true);
     test_pl!(FC, obj_track_times: true);
@@ -137,7 +137,7 @@ fn test_fcpl_obj_track_times() -> hdf5::Result<()> {
 }
 
 #[test]
-fn test_fcpl_attr_phase_change() -> hdf5::Result<()> {
+fn test_fcpl_attr_phase_change() -> hdf5x::Result<()> {
     assert_eq!(FC::try_new()?.get_attr_phase_change()?, AttrPhaseChange::default());
     assert_eq!(FC::try_new()?.attr_phase_change(), AttrPhaseChange::default());
     let pl = FCB::new().attr_phase_change(34, 21).finish()?;
@@ -150,7 +150,7 @@ fn test_fcpl_attr_phase_change() -> hdf5::Result<()> {
 }
 
 #[test]
-fn test_fcpl_attr_creation_order() -> hdf5::Result<()> {
+fn test_fcpl_attr_creation_order() -> hdf5x::Result<()> {
     assert_eq!(FC::try_new()?.get_attr_creation_order()?.bits(), 0);
     assert_eq!(FC::try_new()?.attr_creation_order().bits(), 0);
     test_pl!(FC, attr_creation_order: AttrCreationOrder::TRACKED);
@@ -161,7 +161,7 @@ fn test_fcpl_attr_creation_order() -> hdf5::Result<()> {
 
 #[test]
 #[cfg(feature = "1.10.1")]
-fn test_fcpl_set_file_space_page_size() -> hdf5::Result<()> {
+fn test_fcpl_set_file_space_page_size() -> hdf5x::Result<()> {
     test_pl!(FC, file_space_page_size: 512);
     test_pl!(FC, file_space_page_size: 999);
     Ok(())
@@ -169,7 +169,7 @@ fn test_fcpl_set_file_space_page_size() -> hdf5::Result<()> {
 
 #[test]
 #[cfg(feature = "1.10.1")]
-fn test_fcpl_set_file_space_strategy() -> hdf5::Result<()> {
+fn test_fcpl_set_file_space_strategy() -> hdf5x::Result<()> {
     test_pl!(FC, file_space_strategy: FileSpaceStrategy::PageAggregation);
     test_pl!(FC, file_space_strategy: FileSpaceStrategy::None);
     let fsm = FileSpaceStrategy::FreeSpaceManager { paged: true, persist: true, threshold: 123 };
@@ -181,13 +181,13 @@ type FA = FileAccess;
 type FAB = FileAccessBuilder;
 
 #[test]
-fn test_fapl_common() -> hdf5::Result<()> {
+fn test_fapl_common() -> hdf5x::Result<()> {
     test_pl_common!(FA, PropertyListClass::FileAccess, |b: &mut FAB| b.sieve_buf_size(8).finish());
     Ok(())
 }
 
 #[test]
-fn test_fapl_driver_sec2() -> hdf5::Result<()> {
+fn test_fapl_driver_sec2() -> hdf5x::Result<()> {
     let mut b = FileAccess::build();
     b.sec2();
     check_matches!(b.finish()?.get_driver()?, (), FileDriver::Sec2);
@@ -195,7 +195,7 @@ fn test_fapl_driver_sec2() -> hdf5::Result<()> {
 }
 
 #[test]
-fn test_fapl_driver_stdio() -> hdf5::Result<()> {
+fn test_fapl_driver_stdio() -> hdf5x::Result<()> {
     let mut b = FileAccess::build();
     b.stdio();
     check_matches!(b.finish()?.get_driver()?, (), FileDriver::Stdio);
@@ -203,7 +203,7 @@ fn test_fapl_driver_stdio() -> hdf5::Result<()> {
 }
 
 #[test]
-fn test_fapl_driver_log() -> hdf5::Result<()> {
+fn test_fapl_driver_log() -> hdf5x::Result<()> {
     let mut b = FileAccess::build();
 
     b.log();
@@ -216,7 +216,7 @@ fn test_fapl_driver_log() -> hdf5::Result<()> {
 }
 
 #[test]
-fn test_fapl_driver_core() -> hdf5::Result<()> {
+fn test_fapl_driver_core() -> hdf5x::Result<()> {
     let mut b = FileAccess::build();
 
     b.core();
@@ -249,7 +249,7 @@ fn test_fapl_driver_core() -> hdf5::Result<()> {
 }
 
 #[test]
-fn test_fapl_driver_family() -> hdf5::Result<()> {
+fn test_fapl_driver_family() -> hdf5x::Result<()> {
     let mut b = FileAccess::build();
 
     b.family();
@@ -264,7 +264,7 @@ fn test_fapl_driver_family() -> hdf5::Result<()> {
 }
 
 #[test]
-fn test_fapl_driver_multi() -> hdf5::Result<()> {
+fn test_fapl_driver_multi() -> hdf5x::Result<()> {
     let mut b = FileAccess::build();
 
     b.multi();
@@ -295,7 +295,7 @@ fn test_fapl_driver_multi() -> hdf5::Result<()> {
 }
 
 #[test]
-fn test_fapl_driver_split() -> hdf5::Result<()> {
+fn test_fapl_driver_split() -> hdf5x::Result<()> {
     let mut b = FileAccess::build();
 
     b.split();
@@ -312,7 +312,7 @@ fn test_fapl_driver_split() -> hdf5::Result<()> {
 
 #[test]
 #[cfg(feature = "mpio")]
-fn test_fapl_driver_mpio() -> hdf5::Result<()> {
+fn test_fapl_driver_mpio() -> hdf5x::Result<()> {
     use std::os::raw::c_int;
     use std::ptr;
 
@@ -338,7 +338,7 @@ fn test_fapl_driver_mpio() -> hdf5::Result<()> {
 
 #[test]
 #[cfg(feature = "have-direct")]
-fn test_fapl_driver_direct() -> hdf5::Result<()> {
+fn test_fapl_driver_direct() -> hdf5x::Result<()> {
     let mut b = FileAccess::build();
 
     b.direct();
@@ -355,14 +355,14 @@ fn test_fapl_driver_direct() -> hdf5::Result<()> {
 }
 
 #[test]
-fn test_fapl_set_alignment() -> hdf5::Result<()> {
+fn test_fapl_set_alignment() -> hdf5x::Result<()> {
     test_pl!(FA, alignment: threshold = 1, alignment = 1);
     test_pl!(FA, alignment: threshold = 0, alignment = 32);
     Ok(())
 }
 
 #[test]
-fn test_fapl_set_fclose_degree() -> hdf5::Result<()> {
+fn test_fapl_set_fclose_degree() -> hdf5x::Result<()> {
     test_pl!(FA, fclose_degree: FileCloseDegree::Default);
     test_pl!(FA, fclose_degree: FileCloseDegree::Weak);
     test_pl!(FA, fclose_degree: FileCloseDegree::Semi);
@@ -371,7 +371,7 @@ fn test_fapl_set_fclose_degree() -> hdf5::Result<()> {
 }
 
 #[test]
-fn test_fapl_set_chunk_cache() -> hdf5::Result<()> {
+fn test_fapl_set_chunk_cache() -> hdf5x::Result<()> {
     test_pl!(FA, chunk_cache: nslots = 1, nbytes = 100, w0 = 0.0);
     test_pl!(FA, chunk_cache: nslots = 10, nbytes = 200, w0 = 0.5);
     test_pl!(FA, chunk_cache: nslots = 20, nbytes = 300, w0 = 1.0);
@@ -379,35 +379,35 @@ fn test_fapl_set_chunk_cache() -> hdf5::Result<()> {
 }
 
 #[test]
-fn test_fapl_set_meta_block_size() -> hdf5::Result<()> {
+fn test_fapl_set_meta_block_size() -> hdf5x::Result<()> {
     test_pl!(FA, meta_block_size: 0);
     test_pl!(FA, meta_block_size: 123);
     Ok(())
 }
 
 #[test]
-fn test_fapl_set_sieve_buf_size() -> hdf5::Result<()> {
+fn test_fapl_set_sieve_buf_size() -> hdf5x::Result<()> {
     test_pl!(FA, sieve_buf_size: 42);
     test_pl!(FA, sieve_buf_size: 4096);
     Ok(())
 }
 
 #[test]
-fn test_fapl_set_gc_references() -> hdf5::Result<()> {
+fn test_fapl_set_gc_references() -> hdf5x::Result<()> {
     test_pl!(FA, gc_references: true);
     test_pl!(FA, gc_references: false);
     Ok(())
 }
 
 #[test]
-fn test_fapl_set_small_data_block_size() -> hdf5::Result<()> {
+fn test_fapl_set_small_data_block_size() -> hdf5x::Result<()> {
     test_pl!(FA, small_data_block_size: 0);
     test_pl!(FA, small_data_block_size: 123);
     Ok(())
 }
 
 #[test]
-fn test_fapl_set_mdc_config() -> hdf5::Result<()> {
+fn test_fapl_set_mdc_config() -> hdf5x::Result<()> {
     let mdc_config_1 = MetadataCacheConfig {
         rpt_fcn_enabled: false,
         open_trace_file: false,
@@ -480,7 +480,7 @@ fn test_fapl_set_mdc_config() -> hdf5::Result<()> {
 
 #[test]
 #[cfg(feature = "1.8.7")]
-fn test_fapl_set_elink_file_cache_size() -> hdf5::Result<()> {
+fn test_fapl_set_elink_file_cache_size() -> hdf5x::Result<()> {
     test_pl!(FA, elink_file_cache_size: 0);
     test_pl!(FA, elink_file_cache_size: 17);
     Ok(())
@@ -488,7 +488,7 @@ fn test_fapl_set_elink_file_cache_size() -> hdf5::Result<()> {
 
 #[test]
 #[cfg(feature = "1.10.0")]
-fn test_fapl_set_metadata_read_attempts() -> hdf5::Result<()> {
+fn test_fapl_set_metadata_read_attempts() -> hdf5x::Result<()> {
     test_pl!(FA, metadata_read_attempts: 1);
     test_pl!(FA, metadata_read_attempts: 17);
     Ok(())
@@ -496,7 +496,7 @@ fn test_fapl_set_metadata_read_attempts() -> hdf5::Result<()> {
 
 #[test]
 #[cfg(feature = "1.10.0")]
-fn test_fapl_set_mdc_log_options() -> hdf5::Result<()> {
+fn test_fapl_set_mdc_log_options() -> hdf5x::Result<()> {
     test_pl!(FA, mdc_log_options: is_enabled = true, location = "abc", start_on_access = false,);
     test_pl!(FA, mdc_log_options: is_enabled = false, location = "", start_on_access = true,);
     Ok(())
@@ -504,7 +504,7 @@ fn test_fapl_set_mdc_log_options() -> hdf5::Result<()> {
 
 #[test]
 #[cfg(all(feature = "1.10.0", feature = "mpio"))]
-fn test_fapl_set_all_coll_metadata_ops() -> hdf5::Result<()> {
+fn test_fapl_set_all_coll_metadata_ops() -> hdf5x::Result<()> {
     test_pl!(FA, all_coll_metadata_ops: true);
     test_pl!(FA, all_coll_metadata_ops: false);
     Ok(())
@@ -512,7 +512,7 @@ fn test_fapl_set_all_coll_metadata_ops() -> hdf5::Result<()> {
 
 #[test]
 #[cfg(all(feature = "1.10.0", feature = "mpio"))]
-fn test_fapl_set_coll_metadata_write() -> hdf5::Result<()> {
+fn test_fapl_set_coll_metadata_write() -> hdf5x::Result<()> {
     test_pl!(FA, coll_metadata_write: true);
     test_pl!(FA, coll_metadata_write: false);
     Ok(())
@@ -520,7 +520,7 @@ fn test_fapl_set_coll_metadata_write() -> hdf5::Result<()> {
 
 #[test]
 #[cfg(feature = "1.10.2")]
-fn test_fapl_set_libver_bounds() -> hdf5::Result<()> {
+fn test_fapl_set_libver_bounds() -> hdf5x::Result<()> {
     test_pl!(FA, libver_bounds: low = LibraryVersion::Earliest, high = LibraryVersion::V18);
     test_pl!(FA, libver_bounds: low = LibraryVersion::Earliest, high = LibraryVersion::V110);
     test_pl!(FA, libver_bounds: low = LibraryVersion::V18, high = LibraryVersion::V18);
@@ -545,7 +545,7 @@ fn test_fapl_set_libver_bounds() -> hdf5::Result<()> {
 
 #[test]
 #[cfg(feature = "1.10.1")]
-fn test_fapl_set_page_buffer_size() -> hdf5::Result<()> {
+fn test_fapl_set_page_buffer_size() -> hdf5x::Result<()> {
     test_pl!(FA, page_buffer_size: buf_size = 0, min_meta_perc = 0, min_raw_perc = 0);
     test_pl!(FA, page_buffer_size: buf_size = 0, min_meta_perc = 7, min_raw_perc = 9);
     test_pl!(FA, page_buffer_size: buf_size = 3, min_meta_perc = 0, min_raw_perc = 5);
@@ -554,7 +554,7 @@ fn test_fapl_set_page_buffer_size() -> hdf5::Result<()> {
 
 #[test]
 #[cfg(all(feature = "1.10.1", not(feature = "have-parallel")))]
-fn test_fapl_set_evict_on_close() -> hdf5::Result<()> {
+fn test_fapl_set_evict_on_close() -> hdf5x::Result<()> {
     test_pl!(FA, evict_on_close: true);
     test_pl!(FA, evict_on_close: false);
     Ok(())
@@ -562,7 +562,7 @@ fn test_fapl_set_evict_on_close() -> hdf5::Result<()> {
 
 #[test]
 #[cfg(feature = "1.10.1")]
-fn test_fapl_set_mdc_image_config() -> hdf5::Result<()> {
+fn test_fapl_set_mdc_image_config() -> hdf5x::Result<()> {
     test_pl!(FA, mdc_image_config: generate_image = true);
     test_pl!(FA, mdc_image_config: generate_image = false);
     Ok(())
@@ -572,7 +572,7 @@ type DA = DatasetAccess;
 type DAB = DatasetAccessBuilder;
 
 #[test]
-fn test_dapl_common() -> hdf5::Result<()> {
+fn test_dapl_common() -> hdf5x::Result<()> {
     test_pl_common!(DA, PropertyListClass::DatasetAccess, |b: &mut DAB| b
         .chunk_cache(100, 200, 0.5)
         .finish());
@@ -581,7 +581,7 @@ fn test_dapl_common() -> hdf5::Result<()> {
 
 #[test]
 #[cfg(feature = "1.8.17")]
-fn test_dapl_set_efile_prefix() -> hdf5::Result<()> {
+fn test_dapl_set_efile_prefix() -> hdf5x::Result<()> {
     assert_eq!(DA::try_new()?.get_efile_prefix().unwrap(), "".to_owned());
     assert_eq!(DA::try_new()?.efile_prefix(), "".to_owned());
     let mut b = DA::build();
@@ -591,7 +591,7 @@ fn test_dapl_set_efile_prefix() -> hdf5::Result<()> {
 }
 
 #[test]
-fn test_dapl_set_chunk_cache() -> hdf5::Result<()> {
+fn test_dapl_set_chunk_cache() -> hdf5x::Result<()> {
     test_pl!(DA, chunk_cache: nslots = 1, nbytes = 100, w0 = 0.0);
     test_pl!(DA, chunk_cache: nslots = 10, nbytes = 200, w0 = 0.5);
     test_pl!(DA, chunk_cache: nslots = 20, nbytes = 300, w0 = 1.0);
@@ -600,7 +600,7 @@ fn test_dapl_set_chunk_cache() -> hdf5::Result<()> {
 
 #[test]
 #[cfg(all(feature = "1.10.0", feature = "mpio"))]
-fn test_dapl_set_all_coll_metadata_ops() -> hdf5::Result<()> {
+fn test_dapl_set_all_coll_metadata_ops() -> hdf5x::Result<()> {
     test_pl!(DA, all_coll_metadata_ops: true);
     test_pl!(DA, all_coll_metadata_ops: false);
     Ok(())
@@ -608,7 +608,7 @@ fn test_dapl_set_all_coll_metadata_ops() -> hdf5::Result<()> {
 
 #[test]
 #[cfg(feature = "1.10.0")]
-fn test_dapl_set_virtual_view() -> hdf5::Result<()> {
+fn test_dapl_set_virtual_view() -> hdf5x::Result<()> {
     test_pl!(DA, virtual_view: VirtualView::FirstMissing);
     test_pl!(DA, virtual_view: VirtualView::LastAvailable);
     Ok(())
@@ -616,7 +616,7 @@ fn test_dapl_set_virtual_view() -> hdf5::Result<()> {
 
 #[test]
 #[cfg(feature = "1.10.0")]
-fn test_dapl_set_virtual_printf_gap() -> hdf5::Result<()> {
+fn test_dapl_set_virtual_printf_gap() -> hdf5x::Result<()> {
     test_pl!(DA, virtual_printf_gap: 0);
     test_pl!(DA, virtual_printf_gap: 123);
     Ok(())
@@ -626,7 +626,7 @@ type DC = DatasetCreate;
 type DCB = DatasetCreateBuilder;
 
 #[test]
-fn test_dcpl_common() -> hdf5::Result<()> {
+fn test_dcpl_common() -> hdf5x::Result<()> {
     test_pl_common!(DC, PropertyListClass::DatasetCreate, |b: &mut DCB| b
         .layout(Layout::Compact)
         .finish());
@@ -634,7 +634,7 @@ fn test_dcpl_common() -> hdf5::Result<()> {
 }
 
 #[test]
-fn test_dcpl_set_chunk() -> hdf5::Result<()> {
+fn test_dcpl_set_chunk() -> hdf5x::Result<()> {
     assert!(DC::try_new()?.get_chunk()?.is_none());
     assert_eq!(DCB::new().chunk(&[3, 7]).finish()?.get_chunk()?, Some(vec![3, 7]));
     assert_eq!(DCB::new().chunk((3, 7)).finish()?.chunk(), Some(vec![3, 7]));
@@ -653,7 +653,7 @@ fn test_dcpl_set_chunk() -> hdf5::Result<()> {
 }
 
 #[test]
-fn test_dcpl_set_layout() -> hdf5::Result<()> {
+fn test_dcpl_set_layout() -> hdf5x::Result<()> {
     check_matches!(DC::try_new()?.get_layout()?, (), Layout::Contiguous);
     test_pl!(DC, layout: Layout::Contiguous);
     test_pl!(DC, layout: Layout::Compact);
@@ -665,7 +665,7 @@ fn test_dcpl_set_layout() -> hdf5::Result<()> {
 
 #[cfg(feature = "1.10.0")]
 #[test]
-fn test_dcpl_set_chunk_opts() -> hdf5::Result<()> {
+fn test_dcpl_set_chunk_opts() -> hdf5x::Result<()> {
     assert!(DC::try_new()?.get_chunk_opts()?.is_none());
     let mut b = DCB::new();
     assert!(b.layout(Layout::Contiguous).finish()?.get_chunk_opts()?.is_none());
@@ -682,7 +682,7 @@ fn test_dcpl_set_chunk_opts() -> hdf5::Result<()> {
 }
 
 #[test]
-fn test_dcpl_set_alloc_time() -> hdf5::Result<()> {
+fn test_dcpl_set_alloc_time() -> hdf5x::Result<()> {
     check_matches!(DC::try_new()?.get_alloc_time()?, (), AllocTime::Late);
     let mut b = DCB::new();
     b.alloc_time(None);
@@ -708,7 +708,7 @@ fn test_dcpl_set_alloc_time() -> hdf5::Result<()> {
 }
 
 #[test]
-fn test_dcpl_fill_time() -> hdf5::Result<()> {
+fn test_dcpl_fill_time() -> hdf5x::Result<()> {
     check_matches!(DC::try_new()?.get_fill_time()?, (), FillTime::IfSet);
     check_matches!(DC::try_new()?.fill_time(), (), FillTime::IfSet);
     test_pl!(DC, fill_time: FillTime::IfSet);
@@ -718,9 +718,9 @@ fn test_dcpl_fill_time() -> hdf5::Result<()> {
 }
 
 #[test]
-fn test_dcpl_fill_value() -> hdf5::Result<()> {
-    use hdf5_derive::H5Type;
-    use hdf5_types::{FixedAscii, FixedUnicode, VarLenArray, VarLenAscii, VarLenUnicode};
+fn test_dcpl_fill_value() -> hdf5x::Result<()> {
+    use hdf5x_derive::H5Type;
+    use hdf5x_types::{FixedAscii, FixedUnicode, VarLenArray, VarLenAscii, VarLenUnicode};
 
     check_matches!(DC::try_new()?.get_fill_value_defined()?, (), FillValue::Default);
     check_matches!(DC::try_new()?.fill_value_defined(), (), FillValue::Default);
@@ -763,7 +763,7 @@ fn test_dcpl_fill_value() -> hdf5::Result<()> {
 }
 
 #[test]
-fn test_dcpl_external() -> hdf5::Result<()> {
+fn test_dcpl_external() -> hdf5x::Result<()> {
     assert_eq!(DC::try_new()?.get_external()?, vec![]);
     let pl = DCB::new()
         .external("bar", 0, 1)
@@ -784,8 +784,8 @@ fn test_dcpl_external() -> hdf5::Result<()> {
 
 #[cfg(feature = "1.10.0")]
 #[test]
-fn test_dcpl_virtual_map() -> hdf5::Result<()> {
-    use hdf5::Hyperslab;
+fn test_dcpl_virtual_map() -> hdf5x::Result<()> {
+    use hdf5x::Hyperslab;
     use ndarray::s;
 
     let pl = DC::try_new()?;
@@ -842,7 +842,7 @@ fn test_dcpl_virtual_map() -> hdf5::Result<()> {
 }
 
 #[test]
-fn test_dcpl_obj_track_times() -> hdf5::Result<()> {
+fn test_dcpl_obj_track_times() -> hdf5x::Result<()> {
     assert_eq!(DC::try_new()?.get_obj_track_times()?, true);
     assert_eq!(DC::try_new()?.obj_track_times(), true);
     test_pl!(DC, obj_track_times: true);
@@ -851,7 +851,7 @@ fn test_dcpl_obj_track_times() -> hdf5::Result<()> {
 }
 
 #[test]
-fn test_dcpl_attr_phase_change() -> hdf5::Result<()> {
+fn test_dcpl_attr_phase_change() -> hdf5x::Result<()> {
     assert_eq!(DC::try_new()?.get_attr_phase_change()?, AttrPhaseChange::default());
     assert_eq!(DC::try_new()?.attr_phase_change(), AttrPhaseChange::default());
     let pl = DCB::new().attr_phase_change(34, 21).finish()?;
@@ -864,7 +864,7 @@ fn test_dcpl_attr_phase_change() -> hdf5::Result<()> {
 }
 
 #[test]
-fn test_dcpl_attr_creation_order() -> hdf5::Result<()> {
+fn test_dcpl_attr_creation_order() -> hdf5x::Result<()> {
     assert_eq!(DC::try_new()?.get_attr_creation_order()?.bits(), 0);
     assert_eq!(DC::try_new()?.attr_creation_order().bits(), 0);
     test_pl!(DC, attr_creation_order: AttrCreationOrder::TRACKED);
@@ -877,7 +877,7 @@ type LC = LinkCreate;
 type LCB = LinkCreateBuilder;
 
 #[test]
-fn test_lcpl_common() -> hdf5::Result<()> {
+fn test_lcpl_common() -> hdf5x::Result<()> {
     test_pl_common!(LC, PropertyListClass::LinkCreate, |b: &mut LCB| b
         .create_intermediate_group(true)
         .finish());
@@ -885,7 +885,7 @@ fn test_lcpl_common() -> hdf5::Result<()> {
 }
 
 #[test]
-fn test_lcpl_create_intermediate_group() -> hdf5::Result<()> {
+fn test_lcpl_create_intermediate_group() -> hdf5x::Result<()> {
     assert_eq!(LC::try_new()?.get_create_intermediate_group()?, false);
     assert_eq!(
         LCB::new().create_intermediate_group(false).finish()?.get_create_intermediate_group()?,
@@ -909,8 +909,8 @@ fn test_lcpl_create_intermediate_group() -> hdf5::Result<()> {
 }
 
 #[test]
-fn test_lcpl_char_encoding() -> hdf5::Result<()> {
-    use hdf5::plist::link_create::CharEncoding;
+fn test_lcpl_char_encoding() -> hdf5x::Result<()> {
+    use hdf5x::plist::link_create::CharEncoding;
     assert_eq!(LC::try_new()?.get_char_encoding()?, CharEncoding::Ascii);
     assert_eq!(
         LCB::new().char_encoding(CharEncoding::Ascii).finish()?.get_char_encoding()?,

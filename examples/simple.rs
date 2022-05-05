@@ -1,6 +1,6 @@
 #[cfg(feature = "blosc")]
-use hdf5::filters::blosc_set_nthreads;
-use hdf5::{File, H5Type, Result};
+use hdf5x::filters::blosc_set_nthreads;
+use hdf5x::{File, H5Type, Result};
 use ndarray::{arr2, s};
 
 #[derive(H5Type, Clone, PartialEq, Debug)] // register with HDF5
@@ -24,7 +24,7 @@ impl Pixel {
     }
 }
 
-fn write_hdf5() -> Result<()> {
+fn write_hdf5x() -> Result<()> {
     use Color::*;
     let file = File::create("pixels.h5")?; // open for writing
     let group = file.create_group("dir")?; // create a group
@@ -49,7 +49,7 @@ fn write_hdf5() -> Result<()> {
     Ok(())
 }
 
-fn read_hdf5() -> Result<()> {
+fn read_hdf5x() -> Result<()> {
     use Color::*;
     let file = File::open("pixels.h5")?; // open for reading
     let ds = file.dataset("dir/pixels")?; // open the dataset
@@ -67,7 +67,7 @@ fn read_hdf5() -> Result<()> {
 }
 
 fn main() -> Result<()> {
-    write_hdf5()?;
-    read_hdf5()?;
+    write_hdf5x()?;
+    read_hdf5x()?;
     Ok(())
 }

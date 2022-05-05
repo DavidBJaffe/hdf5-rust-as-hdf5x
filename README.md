@@ -1,25 +1,25 @@
-# hdf5-rust
+# hdf5x-rust
 
 HDF5 for Rust.
 
-[![Build](https://github.com/aldanor/hdf5-rust/workflows/CI/badge.svg)](https://github.com/aldanor/hdf5-rust/actions?query=branch%3Amaster)
-[![Latest Version](https://img.shields.io/crates/v/hdf5.svg)](https://crates.io/crates/hdf5)
-[![Documentation](https://docs.rs/hdf5/badge.svg)](https://docs.rs/hdf5)
-[![Changelog](https://img.shields.io/github/v/release/aldanor/hdf5-rust)](https://github.com/aldanor/hdf5-rust/blob/master/CHANGELOG.md)
-![hdf5: rustc 1.51+](https://img.shields.io/badge/hdf5-rustc_1.51+-lightblue.svg)
-[![Total Lines](https://tokei.rs/b1/github/aldanor/hdf5-rust)](https://github.com/aldanor/hdf5-rust)
+[![Build](https://github.com/aldanor/hdf5x-rust/workflows/CI/badge.svg)](https://github.com/aldanor/hdf5x-rust/actions?query=branch%3Amaster)
+[![Latest Version](https://img.shields.io/crates/v/hdf5x.svg)](https://crates.io/crates/hdf5x)
+[![Documentation](https://docs.rs/hdf5x/badge.svg)](https://docs.rs/hdf5x)
+[![Changelog](https://img.shields.io/github/v/release/aldanor/hdf5x-rust)](https://github.com/aldanor/hdf5x-rust/blob/master/CHANGELOG.md)
+![hdf5x: rustc 1.51+](https://img.shields.io/badge/hdf5x-rustc_1.51+-lightblue.svg)
+[![Total Lines](https://tokei.rs/b1/github/aldanor/hdf5x-rust)](https://github.com/aldanor/hdf5x-rust)
 [![Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
-The `hdf5` crate (previously known as `hdf5-rs`) provides thread-safe Rust bindings and 
+The `hdf5x` crate (previously known as `hdf5x-rs`) provides thread-safe Rust bindings and 
 high-level wrappers for the HDF5 library API. Some of the features include:
 
-- Thread-safety with non-threadsafe libhdf5 builds guaranteed via reentrant mutexes.
+- Thread-safety with non-threadsafe libhdf5x builds guaranteed via reentrant mutexes.
 - Native representation of most HDF5 types, including variable-length strings and arrays.
 - Derive-macro for automatic mapping of user structs and enums to HDF5 types.
 - Multi-dimensional array reading/writing interface via `ndarray`.
 
-Direct low-level bindings are also available and are provided in the `hdf5-sys` crate.
+Direct low-level bindings are also available and are provided in the `hdf5x-sys` crate.
 
 Requires HDF5 library of version 1.8.4 or later.
 
@@ -27,8 +27,8 @@ Requires HDF5 library of version 1.8.4 or later.
 
 ```rust
 #[cfg(feature = "blosc")]
-use hdf5::filters::blosc_set_nthreads;
-use hdf5::{File, H5Type, Result};
+use hdf5x::filters::blosc_set_nthreads;
+use hdf5x::{File, H5Type, Result};
 use ndarray::{arr2, s};
 
 #[derive(H5Type, Clone, PartialEq, Debug)] // register with HDF5
@@ -52,7 +52,7 @@ impl Pixel {
     }
 }
 
-fn write_hdf5() -> Result<()> {
+fn write_hdf5x() -> Result<()> {
     use Color::*;
     let file = File::create("pixels.h5")?; // open for writing
     let group = file.create_group("dir")?; // create a group
@@ -77,7 +77,7 @@ fn write_hdf5() -> Result<()> {
     Ok(())
 }
 
-fn read_hdf5() -> Result<()> {
+fn read_hdf5x() -> Result<()> {
     use Color::*;
     let file = File::open("pixels.h5")?; // open for reading
     let ds = file.dataset("dir/pixels")?; // open the dataset
@@ -95,8 +95,8 @@ fn read_hdf5() -> Result<()> {
 }
 
 fn main() -> Result<()> {
-    write_hdf5()?;
-    read_hdf5()?;
+    write_hdf5x()?;
+    read_hdf5x()?;
     Ok(())
 }
 ```
@@ -105,13 +105,13 @@ fn main() -> Result<()> {
 
 ### Platforms
 
-`hdf5` crate is known to run on these platforms: Linux, macOS, Windows (tested on:
+`hdf5x` crate is known to run on these platforms: Linux, macOS, Windows (tested on:
 Ubuntu 16.04, 18.04, and 20.04; Windows Server 2019 with both MSVC and GNU 
 toolchains; macOS Catalina).
 
 ### Rust
 
-`hdf5` crate is tested continuously for all three official release channels, and
+`hdf5x` crate is tested continuously for all three official release channels, and
 requires a reasonably recent Rust compiler (e.g. of version 1.51 or newer).
 
 ### HDF5
@@ -125,13 +125,13 @@ from both the official channels and conda-forge. On Linux and macOS, both OpenMP
 and MPICH parallel builds are supported and tested. 
 
 The HDF5 C library can also be built from source and linked in statically by 
-enabling `hdf5-sys/static` feature (CMake required).
+enabling `hdf5x-sys/static` feature (CMake required).
 
 ## Building
 
 ### HDF5 version
 
-Build scripts for both `hdf5-sys` and `hdf5` crates check the actual version of the
+Build scripts for both `hdf5x-sys` and `hdf5x` crates check the actual version of the
 HDF5 library that they are being linked against, and some functionality may be conditionally
 enabled or disabled at compile time. While this allows supporting multiple versions of HDF5
 in a single codebase, this is something the library user should be aware of in case they
@@ -148,7 +148,7 @@ help locating the library (e.g. when both 1.8 and 1.10 are installed via Homebre
 
 ### conda
 
-It is possible to link against `hdf5` conda package; a few notes and tips:
+It is possible to link against `hdf5x` conda package; a few notes and tips:
 
 - Point `HDF5_DIR` to conda environment root.
 - The build script knows about conda environment layout specifics and will adjust
@@ -174,7 +174,7 @@ unless `HDF5_VERSION` is set.
 
 ### Windows
 
-`hdf5` crate fully supports MSVC toolchain, which allows using the
+`hdf5x` crate fully supports MSVC toolchain, which allows using the
 [official releases](https://www.hdfgroup.org/downloads/index.html) of
 HDF5 and is generally the recommended way to go. That being said, previous experiments have 
 shown that all tests pass on the `gnu` target as well, one just needs to be careful with 
@@ -182,7 +182,7 @@ building the HDF5 binary itself and configuring the build environment.
 
 Few things to note when building on Windows:
 
-- `hdf5.dll` should be available in the search path at build time and runtime (both `gnu` and `msvc`).
+- `hdf5x.dll` should be available in the search path at build time and runtime (both `gnu` and `msvc`).
   This normally requires adding the `bin` folder of HDF5 installation to `PATH`. If using an official
   HDF5 release (`msvc` only), this will typically be done automatically by the installer.
 - `msvc`: installed Visual Studio version should match the HDF5 binary (2013 or 2015). Note that it
@@ -196,6 +196,6 @@ Few things to note when building on Windows:
 
 ## License
 
-`hdf5` crate is primarily distributed under the terms of both the MIT license and the
+`hdf5x` crate is primarily distributed under the terms of both the MIT license and the
 Apache License (Version 2.0). See [LICENSE-APACHE](LICENSE-APACHE) and
 [LICENSE-MIT](LICENSE-MIT) for details.

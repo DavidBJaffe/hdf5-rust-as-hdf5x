@@ -4,7 +4,7 @@ use std::panic;
 use std::ptr;
 use std::str::FromStr;
 
-use hdf5_sys::h5p::{
+use hdf5x_sys::h5p::{
     H5Pcopy, H5Pequal, H5Pexist, H5Pget_class, H5Pget_class_name, H5Pget_nprops, H5Piterate,
     H5Pset_vlen_mem_manager,
 };
@@ -211,7 +211,7 @@ impl PropertyList {
 }
 
 /// Set the memory manager for variable length items to
-/// the same allocator as is in use by hdf5-types
+/// the same allocator as is in use by hdf5x-types
 // TODO: move this to dataset_transfer module when DatasetTransfer plist is implemented
 pub fn set_vlen_manager_libc(plist: hid_t) -> Result<()> {
     extern "C" fn alloc(size: size_t, _info: *mut c_void) -> *mut c_void {
@@ -234,7 +234,7 @@ pub fn set_vlen_manager_libc(plist: hid_t) -> Result<()> {
 
 #[cfg(test)]
 pub mod tests {
-    use hdf5_sys::h5p::H5Pcreate;
+    use hdf5x_sys::h5p::H5Pcreate;
 
     use crate::globals::{H5P_FILE_ACCESS, H5P_FILE_CREATE};
     use crate::internal_prelude::*;

@@ -5,9 +5,9 @@ use std::ops::Deref;
 
 use ndarray::{Array, Array1, Array2, ArrayD, ArrayView, ArrayView1};
 
-use hdf5_sys::h5a::{H5Aget_space, H5Aget_storage_size, H5Aget_type, H5Aread, H5Awrite};
-use hdf5_sys::h5d::{H5Dget_space, H5Dget_storage_size, H5Dget_type, H5Dread, H5Dwrite};
-use hdf5_sys::h5p::H5Pcreate;
+use hdf5x_sys::h5a::{H5Aget_space, H5Aget_storage_size, H5Aget_type, H5Aread, H5Awrite};
+use hdf5x_sys::h5d::{H5Dget_space, H5Dget_storage_size, H5Dget_type, H5Dread, H5Dwrite};
+use hdf5x_sys::h5p::H5Pcreate;
 
 use crate::internal_prelude::*;
 
@@ -52,7 +52,7 @@ impl<'a> Reader<'a> {
             let mspace_id = mspace.map_or(H5S_ALL, |m| m.id());
             let xfer =
                 PropertyList::from_id(h5call!(H5Pcreate(*crate::globals::H5P_DATASET_XFER))?)?;
-            if !hdf5_types::USING_H5_ALLOCATOR {
+            if !hdf5x_types::USING_H5_ALLOCATOR {
                 crate::hl::plist::set_vlen_manager_libc(xfer.id())?;
             }
             h5try!(H5Dread(obj_id, tp_id, mspace_id, fspace_id, xfer.id(), buf.cast()));

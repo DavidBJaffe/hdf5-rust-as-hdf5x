@@ -6,10 +6,10 @@ lazy_static! {
         // No functions called here must try to create the LOCK,
         // as this could cause a deadlock in initialisation
         unsafe {
-            // Ensure hdf5 does not invalidate handles which might
+            // Ensure hdf5x does not invalidate handles which might
             // still be live on other threads on program exit
-            ::hdf5_sys::h5::H5dont_atexit();
-            ::hdf5_sys::h5::H5open();
+            ::hdf5x_sys::h5::H5dont_atexit();
+            ::hdf5x_sys::h5::H5open();
             // Ignore errors on stdout
             crate::error::silence_errors_no_sync(true);
             // Register filters lzf/blosc if available

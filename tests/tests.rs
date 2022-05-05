@@ -1,6 +1,6 @@
 #[test]
 fn roundtrip_compound_type() {
-    use hdf5::H5Type;
+    use hdf5x::H5Type;
     #[derive(H5Type)]
     #[repr(C)]
     struct Compound {
@@ -8,7 +8,7 @@ fn roundtrip_compound_type() {
         b: u8,
     }
 
-    let dt = hdf5::Datatype::from_type::<Compound>().unwrap();
+    let dt = hdf5x::Datatype::from_type::<Compound>().unwrap();
     let td = dt.to_descriptor().unwrap();
     assert_eq!(td, Compound::type_descriptor());
 }

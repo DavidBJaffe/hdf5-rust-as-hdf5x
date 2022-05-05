@@ -7,13 +7,13 @@ use std::slice;
 
 use ndarray::{self, s, Array1, Array2, ArrayView1, ArrayView2};
 
-use hdf5_sys::h5s::{
+use hdf5x_sys::h5s::{
     H5S_sel_type, H5Sget_select_elem_npoints, H5Sget_select_elem_pointlist, H5Sget_select_type,
     H5Sget_simple_extent_ndims, H5Sselect_all, H5Sselect_elements, H5Sselect_hyperslab,
     H5Sselect_none, H5S_SELECT_SET, H5S_UNLIMITED,
 };
 #[cfg(feature = "1.10.0")]
-use hdf5_sys::h5s::{H5Sget_regular_hyperslab, H5Sis_regular_hyperslab};
+use hdf5x_sys::h5s::{H5Sget_regular_hyperslab, H5Sis_regular_hyperslab};
 
 use crate::hl::extents::Ix;
 use crate::internal_prelude::*;
@@ -258,7 +258,7 @@ impl RawSelection {
 /// s s _ _ s s _ _ s s _
 /// ```
 ///
-/// See also [`this hdf5 tutorial`](https://support.hdfgroup.org/HDF5/Tutor/select.html)
+/// See also [`this hdf5x tutorial`](https://support.hdfgroup.org/HDF5/Tutor/select.html)
 /// for more information on hyperslab selections.
 #[derive(Clone, Copy, Debug, Eq)]
 pub enum SliceOrIndex {
@@ -377,7 +377,7 @@ impl TryFrom<ndarray::SliceInfoElem> for SliceOrIndex {
                     Some(Err(e)) => return Err(e),
                 }
             }
-            ndarray::SliceInfoElem::NewAxis => fail!("ndarray NewAxis can not be mapped to hdf5"),
+            ndarray::SliceInfoElem::NewAxis => fail!("ndarray NewAxis can not be mapped to hdf5x"),
         })
     }
 }
@@ -1559,7 +1559,7 @@ mod test {
     #[test]
     fn test_apply_extract_selection() -> Result<()> {
         use crate::sync::sync;
-        use hdf5_sys::h5s::{H5Sclose, H5Screate_simple};
+        use hdf5x_sys::h5s::{H5Sclose, H5Screate_simple};
         use std::ptr;
 
         fn check<Sh>(

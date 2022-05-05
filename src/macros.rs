@@ -97,7 +97,7 @@ macro_rules! h5lock {
     }};
 }
 
-/// Convert result of an HDF5 call to `hdf5::Result` (guarded by a global reentrant mutex).
+/// Convert result of an HDF5 call to `hdf5x::Result` (guarded by a global reentrant mutex).
 #[macro_export]
 #[doc(hidden)]
 macro_rules! h5call {
@@ -177,8 +177,8 @@ macro_rules! h5err {
         let msg = to_cstring($msg).unwrap_or_default();
         #[allow(unused_unsafe)]
         unsafe {
-            ::hdf5_sys::h5e::H5Epush2(
-                ::hdf5_sys::h5e::H5E_DEFAULT,
+            ::hdf5x_sys::h5e::H5Epush2(
+                ::hdf5x_sys::h5e::H5E_DEFAULT,
                 file.as_ptr(),
                 modpath.as_ptr(),
                 line as _,

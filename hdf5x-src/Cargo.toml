@@ -1,0 +1,38 @@
+[package]
+name = "hdf5x-src"
+version = "0.8.0"  # !V
+authors = ["Ivan Smirnov <i.s.smirnov@gmail.com>"]
+keywords = ["hdf5x"]
+license-file = "ext/hdf5x/COPYING"
+build = "build.rs"
+repository = "https://github.com/aldanor/hdf5x-rust"
+homepage = "https://github.com/aldanor/hdf5x-rust"
+description = "Build script for compiling HDF5 C library from source."
+edition = "2018"
+links = "hdf5xsrc"
+exclude = [
+    "ext/hdf5x/bin/**",
+    "ext/hdf5x/c++/**",
+    "ext/hdf5x/examples/**",
+    "ext/hdf5x/fortran/**",
+    "ext/hdf5x/java/**",
+    "ext/hdf5x/release_docs/**",
+    "ext/hdf5x/test/**",
+    "ext/hdf5x/testpar/**",
+    "ext/hdf5x/tools/**",
+    "ext/hdf5x/hl/test/**",
+    "ext/hdf5x/hl/tools/**",
+    "ext/hdf5x/hl/examples/**",
+]
+
+[features]
+hl = []
+zlib = ["libz-sys"]
+deprecated = []
+threadsafe = []
+
+[dependencies]
+libz-sys = { version = "1.0.25", features = ["static"], optional = true, default-features=false }
+
+[build-dependencies]
+cmake = "0.1.44"

@@ -42,7 +42,7 @@ pub fn string_to_fixed_bytes(s: &str, buf: &mut [c_char]) {
 
 #[cfg(feature = "1.8.13")]
 pub fn h5_free_memory(mem: *mut c_void) {
-    use hdf5_sys::h5::H5free_memory;
+    use hdf5x_sys::h5::H5free_memory;
     unsafe { H5free_memory(mem) };
 }
 
@@ -74,7 +74,7 @@ where
 mod tests {
     use std::ptr;
 
-    use hdf5_sys::h5e::H5Eget_msg;
+    use hdf5x_sys::h5e::H5Eget_msg;
 
     use crate::globals::H5E_CANTOPENOBJ;
 

@@ -2,8 +2,8 @@ use std::convert::TryFrom;
 use std::fmt;
 use std::iter;
 
-use hdf5::types::{FixedAscii, FixedUnicode, VarLenArray, VarLenAscii, VarLenUnicode};
-use hdf5::H5Type;
+use hdf5x::types::{FixedAscii, FixedUnicode, VarLenArray, VarLenAscii, VarLenUnicode};
+use hdf5x::H5Type;
 
 use ndarray::{ArrayD, SliceInfo, SliceInfoElem};
 use rand::distributions::{Alphanumeric, Uniform};

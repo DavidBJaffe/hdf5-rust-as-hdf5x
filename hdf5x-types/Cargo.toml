@@ -1,0 +1,24 @@
+[package]
+name = "hdf5x-types"
+version = "0.8.0"  # !V
+authors = ["Ivan Smirnov <i.s.smirnov@gmail.com>"]
+keywords = ["hdf5x"]
+license = "MIT OR Apache-2.0"
+description = "Native Rust equivalents of HDF5 types."
+repository = "https://github.com/aldanor/hdf5x-rust"
+homepage = "https://github.com/aldanor/hdf5x-rust"
+edition = "2018"
+build = "build.rs"
+
+[features]
+h5-alloc = []
+
+[dependencies]
+ascii = "1.0"
+libc = "0.2"
+hdf5x-sys = { version = "0.8.0", path = "../hdf5x-sys" }  # !V
+cfg-if = "1.0.0"
+
+[dev-dependencies]
+quickcheck = { version = "1.0", default-features = false }
+unindent = "0.1"

@@ -48,10 +48,10 @@ Release date: Oct 23, 2021.
 - File creation property list (FCPL) API has been extended to include a few
   previously missing properties (object time tracking, attribute creation order
   and few other settings).
-- Added "h5-alloc" feature to `hdf5-types` crate. It enables using the HDF5
+- Added "h5-alloc" feature to `hdf5x-types` crate. It enables using the HDF5
   library allocator for varlen types and dynamic values. This may be necessary
   on platforms where different allocators may be used in different libraries
-  (e.g. dynamic libraries on Windows) or if `libhdf5` is compiled with the
+  (e.g. dynamic libraries on Windows) or if `libhdf5x` is compiled with the
   memchecker option enabled. This option is force-enabled by default if using
   a dll version of the HDF5 library on Windows.
 - Added new `DynValue` type which represents a dynamic self-describing HDF5
@@ -60,7 +60,7 @@ Release date: Oct 23, 2021.
 - Added support for attributes and a new `Attribute` object type. The attribute
   API uses the new dataset API with some restrictions imposed by HDF5 library
   (e.g. one can not perform partial IO, attributes must be read all at once).
-- `hdf5-sys` now exports new functions added in HDF5 1.10.6 and 1.10.7.
+- `hdf5x-sys` now exports new functions added in HDF5 1.10.6 and 1.10.7.
 - Added to `Dataset`:
   - `layout`: get the dataset layout.
   - `dapl`, `access_plist`: get the dataset access plist.
@@ -106,12 +106,12 @@ Release date: Oct 23, 2021.
 - `write_slice`, `read_slice`, `read_slice_1d`, `read_slice_2d` in `Container`
   now take any object convertible to `Selection` (instead of `SliceInfo`).
 - `Dataset::chunks` has been renamed to `Dataset::chunk`.
-- Const generics support (MSRV 1.51): `hdf5-types` now uses const generics for
+- Const generics support (MSRV 1.51): `hdf5x-types` now uses const generics for
   array types, allowing fixed-size arrays of arbitrary sizes. `Array` trait has
   been removed. String types are now generic over size: `FixedAscii<N>` and
   `FixedUnicode<N>`.
 - `ndarray` dependency has been updated to `0.15`.
-- The version of HDF5 in `hdf5-src` has been updated from 1.10.6 to 1.10.7.
+- The version of HDF5 in `hdf5x-src` has been updated from 1.10.6 to 1.10.7.
 - `zlib` dependency is no longer included with `default-features`.
 - The crate no longer calls `H5close` automatically on program exit.
 - Errors are now silenced, and will not be written to stderr by default.
@@ -146,7 +146,7 @@ Release date: Jan 27, 2021.
 ### Added
 
 - Slices can now be used where trait item `Dimension` is required.
-- Arrays of arbitrary sizes are now supported in `hdf5-types`. This requires
+- Arrays of arbitrary sizes are now supported in `hdf5x-types`. This requires
   the crate feature `const_generics` and minimum Rust version of 1.51.
 
 ### Changed
@@ -156,7 +156,7 @@ Release date: Jan 27, 2021.
 
 ### Fixed
 
-- Cross-compilation of `hdf5-src` from Unix to Windows will now use the correct
+- Cross-compilation of `hdf5x-src` from Unix to Windows will now use the correct
   name of the static library when linking.
 
 ## 0.7.0
@@ -166,11 +166,11 @@ Release date: Aug 9, 2020.
 ### Added
 
 - HDF5 C library can now be built from source and linked in statically, enabled
-  via `hdf5-sys/static` feature (as of this release, the version of the bundled
+  via `hdf5x-sys/static` feature (as of this release, the version of the bundled
   sources of HDF5 is 1.10.6). CMake is required for building. For further
-  details, see the docs for `hdf5-sys`.
+  details, see the docs for `hdf5x-sys`.
 - Thanks to static build option, the documentation will now be built on 
-  [docs.rs](https://docs.rs/crate/hdf5); if it builds successfully, this 
+  [docs.rs](https://docs.rs/crate/hdf5x); if it builds successfully, this 
   will be the official documentation source from now on.
 - Add support for HDF5 1.12 on all platforms and include it in CI.
 
@@ -188,7 +188,7 @@ Release date: Aug 9, 2020.
 
 - We now force the variable-length allocator that HDF5 uses when reading data
   to use `libc::malloc` and `libc::free`, so that they can be deallocated
-  properly by `VarLenString` and `VarLenArray` in `hdf5-types`. Previously,
+  properly by `VarLenString` and `VarLenArray` in `hdf5x-types`. Previously,
   this could cause a rare but serious failure for Windows builds when the 
   default allocator used for vlen types by HDF5 was not matching the 
   libc deallocator.
@@ -215,14 +215,14 @@ Release date: Apr 12, 2020.
 - `h5check!`, `h5lock!`, `h5try!`, `h5call!` and `h5check()` are now public.
 - `globals` module containing HDF5 runtime constants is now also public.
 - Switch to using 1.0 versions of `syn`, `quote` and `proc-macro2` (which
-  required a bit of a rewrite of `hdf5-derive`).
-- Bump `ascii` to 1.0, update `hdf5-types` to be compatible.
+  required a bit of a rewrite of `hdf5x-derive`).
+- Bump `ascii` to 1.0, update `hdf5x-types` to be compatible.
 - Bump other dependencies to their latest versions (`parking_lot` to 0.10,
   `ndarray` to 0.13, `bitflags` to 1.2, `lazy_static` to 1.4,
   `libloading` to 0.6, `winreg` to 0.7).
 - Remove implementations of deprecated `Error::description()`.
 - Switch to `trybuild` instead of `compiletest_rs` for derive-macro testing;
-  enable full tests (including hdf5-derive) on both AppVeyor and Travis.
+  enable full tests (including hdf5x-derive) on both AppVeyor and Travis.
 - Update the minimum Rust version to 1.40 (due to `ndarray` and `libloading`).
 
 ### Fixed
@@ -272,16 +272,16 @@ Release date: Feb 17, 2020.
 - It's no longer prohibited to set FCPL options when opening a file and not
   creating it -- it will simply be silently ignored (this simplifies the
   behavior and allows using a single file builder).
-- Added an explicit `hdf5_types::string::StringError` error type, and
+- Added an explicit `hdf5x_types::string::StringError` error type, and
   `error-chain` dependency has now been dropped.
 - `Error` is now convertible from `ndarray::ShapeError`; `ResultExt` trait has
   been removed.
-- Renamed `hdf5_version()` to `library_version()`.
+- Renamed `hdf5x_version()` to `library_version()`.
 
 ### Fixed
 
 - Replaced deprecated `std::mem::uninitialized` with `std::mem::MaybeUninit`.
-- Fixed a serde-related problem with building `hdf5-sys` on Windows.
+- Fixed a serde-related problem with building `hdf5x-sys` on Windows.
 
 ## 0.5.2
 
@@ -304,7 +304,7 @@ Release date: Mar 8, 2019.
 
 ### Changed
 
-- `#[derive(H5Type)]` no longer requires adding `hdf5-types` as a dependency.
+- `#[derive(H5Type)]` no longer requires adding `hdf5x-types` as a dependency.
 
 ## 0.5.0
 
@@ -315,10 +315,10 @@ Release date: Mar 8, 2019.
 - Added support for HDF5 1.10.
 - Added Rust equivalents of HDF5 primitives: arrays, Unicode strings and ASCII
   strings – all of them available in both fixed-size/variable-length flavours
-  (see `hdf5-types` crate for details).
+  (see `hdf5x-types` crate for details).
 - Added `H5Type` trait that unifies the types that can be handled by the HDF5
   library. This trait is implemented by default for all scalar types, tuples,
-  fixed-size arrays and all types in `hdf5-types` and can be used to create
+  fixed-size arrays and all types in `hdf5x-types` and can be used to create
   `Datatype` objects for known types.
 - Implemented `#[derive(H5Type)]` proc macro that allows for seamless mapping
   of user-defined structs and enums to their HDF5 counterparts.
@@ -330,7 +330,7 @@ Release date: Mar 8, 2019.
 - Added support for MPIO driver (requires `H5_HAVE_PARALLEL` HDF5 flag and the
   crate has to be built with "mpio" feature enabled).
 - Added support for direct VFD driver (requires `H5_HAVE_DIRECT` HDF5 flag).
-- Added some missing bindings to `hdf5-sys`: driver-related FAPL bindings in
+- Added some missing bindings to `hdf5x-sys`: driver-related FAPL bindings in
   `h5p` and `h5fd` (including MPIO and direct VFD drivers), MPIO bindings in
   `h5p`, `h5f` and `h5fd`.
 - Added core reading/writing API in `Container`, with support for reading and
@@ -345,13 +345,13 @@ Release date: Mar 8, 2019.
 
 ### Changed
 
-- Renamed `hdf5-rs` crate to `hdf5`.
-- Renamed `libhdf5-sys` crate to `hdf5-sys` (importable as `hdf5_sys`).
-- Renamed GitHub repository to `aldanor/hdf5-rust`.
+- Renamed `hdf5x-rs` crate to `hdf5x`.
+- Renamed `libhdf5x-sys` crate to `hdf5x-sys` (importable as `hdf5x_sys`).
+- Renamed GitHub repository to `aldanor/hdf5x-rust`.
 - Updated the bindings and tests to the latest HDF5 versions (1.10.4 / 1.8.21).
 - The build system has been reworked from the ground up:
-  - `hdf5-lib` crate has been removed; all the build-time logic now resides in
-    the build script of `hdf5-sys`.
+  - `hdf5x-lib` crate has been removed; all the build-time logic now resides in
+    the build script of `hdf5x-sys`.
   - The build script now looks for `HDF5_DIR` and `HDF5_VERSION` env vars.
   - `pkg-config` is now only launched on Linux.
   - macOS: the build script detects Homebrew installations (both 1.8 and 1.10).
@@ -360,7 +360,7 @@ Release date: Mar 8, 2019.
   - A few definitions from `H5pubconf.h` are now exposed as cfg definitions,
     like `h5_have_parallel`, `h5_have_threadsafe` and `h5_have_direct` (this
     requires locating the include folder and parsing the header at build time).
-- Various cleanups in `hdf5-sys`: implemented `Default` and `Clone` where
+- Various cleanups in `hdf5x-sys`: implemented `Default` and `Clone` where
   applicable, moved a few types and methods to matching parent modules.
 - Major refactor: trait-based type hierarchy has been replaced with a
   `Deref`-based hierarchy instead (53eff4f). `ID` and `FromID` traits have been
@@ -384,14 +384,14 @@ Release date: Mar 8, 2019.
 
 ### Removed
 
-- Removed `hdf5-lib` crate (merged it into `hdf5-sys`, see above).
+- Removed `hdf5x-lib` crate (merged it into `hdf5x-sys`, see above).
 - Removed `remutex` crate, using locking primitives from `parking_lot` crate.
 - `Container` trait has been removed in favor of `Group` type.
 
 ### Notes
 
-- The version number jump is due to renaming crates `hdf5-rs` and `libhdf5-sys`
-  to `hdf5` and `hdf5-sys`, respectively. Since there were already published
+- The version number jump is due to renaming crates `hdf5x-rs` and `libhdf5x-sys`
+  to `hdf5x` and `hdf5x-sys`, respectively. Since there were already published
   crates with those names and the crates registry is meant to be immutable even
   if the crates are yanked, we had to bump the version so that it shadows all
   the older versions.
@@ -410,21 +410,21 @@ Release date: Jul 29, 2015.
   directory will be inferred automatically. The official HDF5 installers add 
   the `bin` folder to user path, so the official MSVC releases should just work
   out of the box without having to set any environment variables.
-- The library is now split into three crates: `hdf5-lib` (requests linkage to
-  HDF5), `hdf5-sys` (contains bindings, requires `hdf5-lib` at build time in
+- The library is now split into three crates: `hdf5x-lib` (requests linkage to
+  HDF5), `hdf5x-sys` (contains bindings, requires `hdf5x-lib` at build time in
   order to conditionally enable or disable certain HDF5 functionality), and
-  `hdf5` (the user-facing crate, requires both lower-level crates at build time).
-- Added `hdf5::hdf5_version` function.
+  `hdf5x` (the user-facing crate, requires both lower-level crates at build time).
+- Added `hdf5x::hdf5x_version` function.
 - The minimum required version of the HDF5 library is now 1.8.4.
-- Both `hdf5-sys` and `hdf5` crates can now use version attributes at compile
+- Both `hdf5x-sys` and `hdf5x` crates can now use version attributes at compile
   time to enable/disable/change functionality. All functions and definitions
   that appeared in HDF5 versions past 1.8.4 are now conditionally enabled in
-  `hdf5-sys`.
+  `hdf5x-sys`.
 - Added bindings for HDF5 functions that were added in 1.8.15 and 1.8.16.
 - Static global variables in HDF5 (H5E, H5P, H5T) are now linked based on HDF5
   version and not the target platform (`_ID_g` variables were introduced in
   1.8.14). When `msvc` target is used, dllimport stub prefixes are also
-  accounted for. Constants exposed by `hdf5-sys` are now of reference type and
+  accounted for. Constants exposed by `hdf5x-sys` are now of reference type and
   need to be dereferenced (for `msvc`, they have to be dereferenced twice).
 
 ### Changed
