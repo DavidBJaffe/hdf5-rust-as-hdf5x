@@ -64,7 +64,7 @@ fn main() {
     if feature_enabled("HL") {
         cfg.define("HDF5_BUILD_HL_LIB", "ON");
         let mut hdf5x_hl_lib =
-            if cfg!(target_env = "msvc") { "libhdf5x_hl" } else { "hdf5x_hl" }.to_owned();
+            if cfg!(target_env = "msvc") { "libhdf5_hl" } else { "hdf5_hl" }.to_owned();
         if let Ok(opt_level) = env::var("OPT_LEVEL") {
             if opt_level == "0" {
                 hdf5x_hl_lib.push_str(debug_postfix);
@@ -86,7 +86,7 @@ fn main() {
     let hdf5x_incdir = format!("{}/include", dst.display());
     println!("cargo:include={}", hdf5x_incdir);
 
-    let mut hdf5x_lib = if cfg!(target_env = "msvc") { "libhdf5x" } else { "hdf5x" }.to_owned();
+    let mut hdf5x_lib = if cfg!(target_env = "msvc") { "libhdf5" } else { "hdf5" }.to_owned();
     if let Ok(opt_level) = env::var("OPT_LEVEL") {
         if opt_level == "0" {
             hdf5x_lib.push_str(debug_postfix);

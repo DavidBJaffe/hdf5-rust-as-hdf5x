@@ -108,7 +108,7 @@ fn get_runtime_version_single<P: AsRef<Path>>(path: P) -> Result<Version, Box<dy
 
 fn validate_runtime_version(config: &Config) {
     println!("Looking for HDF5 library binary...");
-    let libfiles = &["libhdf5x.dylib", "libhdf5x.so", "hdf5x.dll"];
+    let libfiles = &["libhdf5.dylib", "libhdf5.so", "hdf5.dll"];
     let mut link_paths = config.link_paths.clone();
     if cfg!(all(unix, not(target_os = "macos"))) {
         if let Some(ldv) = run_command("ld", &["--verbose"]) {
@@ -243,7 +243,7 @@ mod unix {
         let mut pc = pkg_config::Config::new();
         pc.cargo_metadata(false);
         println!("Attempting to find HDF5 via pkg-config...");
-        if let Ok(library) = pc.probe("hdf5x") {
+        if let Ok(library) = pc.probe("hdf5") {
             println!("Found HDF5 pkg-config entry");
             println!("    Include paths:");
             for dir in &library.include_paths {
@@ -274,7 +274,7 @@ mod unix {
             return;
         }
         for (inc_dir, lib_dir) in &[
-            ("/usr/include/hdf5x/serial", "/usr/lib/x86_64-linux-gnu/hdf5x/serial"),
+            ("/usr/include/hdf5/serial", "/usr/lib/x86_64-linux-gnu/hdf5/serial"),
             ("/usr/include", "/usr/lib/x86_64-linux-gnu"),
             ("/usr/include", "/usr/lib64"),
         ] {
@@ -321,28 +321,28 @@ mod macos {
             }
         );
         if !(v18 || v110) {
-            if let Some(out) = run_command("brew", &["--prefix", "hdf5x@1.12"]) {
+            if let Some(out) = run_command("brew", &["--prefix", "hdf5@1.12"]) {
                 if is_root_dir(&out) {
                     config.inc_dir = Some(PathBuf::from(out).join("include"));
                 }
             }
         }
         if config.inc_dir.is_none() && !v18 {
-            if let Some(out) = run_command("brew", &["--prefix", "hdf5x@1.10"]) {
+            if let Some(out) = run_command("brew", &["--prefix", "hdf5@1.10"]) {
                 if is_root_dir(&out) {
                     config.inc_dir = Some(PathBuf::from(out).join("include"));
                 }
             }
         }
         if config.inc_dir.is_none() {
-            if let Some(out) = run_command("brew", &["--prefix", "hdf5x@1.8"]) {
+            if let Some(out) = run_command("brew", &["--prefix", "hdf5@1.8"]) {
                 if is_root_dir(&out) {
                     config.inc_dir = Some(PathBuf::from(out).join("include"));
                 }
             }
         }
         if config.inc_dir.is_none() {
-            if let Some(out) = run_command("brew", &["--prefix", "hdf5x-mpi"]) {
+            if let Some(out) = run_command("brew", &["--prefix", "hdf5-mpi"]) {
                 if is_root_dir(&out) {
                     config.inc_dir = Some(PathBuf::from(out).join("include"));
                 }
@@ -590,7 +590,7 @@ pub struct Config {
 
 impl Config {
     pub fn emit_link_flags(&self) {
-        println!("cargo:rustc-link-lib=dylib=hdf5x");
+        println!("cargo:rustc-link-lib=dylib=hdf5");
         for dir in &self.link_paths {
             println!("cargo:rustc-link-search=native={}", dir.to_str().unwrap());
         }
@@ -602,10 +602,10 @@ impl Config {
         }
         println!("cargo:include={}", self.inc_dir.to_str().unwrap());
 
-        println!("cargo:library=hdf5x");
+        println!("cargo:library=hdf5");
 
         if feature_enabled("HL") {
-            println!("cargo:hl_library=hdf5x_hl");
+            println!("cargo:hl_library=hdf5_hl");
         }
     }
 
@@ -711,8 +711,8 @@ mod conda_dl {
 
         pub const DLS: &[(&'static str, &'static str, &'static str)] = &[
             (
-                "hdf5x-1.12.0-hc3cf35f_0.tar.bz2",
-                "https://anaconda.org/anaconda/hdf5x/1.12.0/download/linux-64/hdf5x-1.12.0-hc3cf35f_0.tar.bz2",
+                "hdf5-1.12.0-hc3cf35f_0.tar.bz2",
+                "https://anaconda.org/anaconda/hdf5/1.12.0/download/linux-64/hdf5-1.12.0-hc3cf35f_0.tar.bz2",
                 "1681beaec0bcbd0025731735902744ef4db6a3084d9d325d814ec9758a2da31c",
             ),
             (
@@ -730,8 +730,8 @@ mod conda_dl {
 
         pub const DLS: &[(&'static str, &'static str, &'static str)] = &[
             (
-                "hdf5x-1.12.0-h964e04d_0.tar.bz2",
-                "https://anaconda.org/anaconda/hdf5x/1.12.0/download/osx-64/hdf5x-1.12.0-h964e04d_0.tar.bz2",
+                "hdf5-1.12.0-h964e04d_0.tar.bz2",
+                "https://anaconda.org/anaconda/hdf5/1.12.0/download/osx-64/hdf5-1.12.0-h964e04d_0.tar.bz2",
                 "1d6e4058ab8ad0ea70dd755b62310a956f9a026ab6a3336ff4bd605c806d7c60",
             ),
             (
@@ -749,13 +749,13 @@ mod conda_dl {
 
         pub const DLS: &[(&'static str, &'static str, &'static str)] = &[
             (
-                "hdf5x-static-1.12.1-nompi_h18eddcc_102.tar.bz2",
-                "https://anaconda.org/conda-forge/hdf5x-static/1.12.1/download/osx-arm64/hdf5x-static-1.12.1-nompi_h18eddcc_102.tar.bz2",
+                "hdf5-static-1.12.1-nompi_h18eddcc_102.tar.bz2",
+                "https://anaconda.org/conda-forge/hdf5-static/1.12.1/download/osx-arm64/hdf5-static-1.12.1-nompi_h18eddcc_102.tar.bz2",
                 "ee6e87b831eefdc5d7d5ec39705c94bbec55b0f1fc11058242fb18a462fb1484",
             ),
             (
-                "hdf5x-1.12.1-nompi_had0e5e0_101.tar.bz2",
-                "https://anaconda.org/conda-forge/hdf5x/1.12.1/download/osx-arm64/hdf5x-1.12.1-nompi_had0e5e0_101.tar.bz2",
+                "hdf5-1.12.1-nompi_had0e5e0_101.tar.bz2",
+                "https://anaconda.org/conda-forge/hdf5/1.12.1/download/osx-arm64/hdf5-1.12.1-nompi_had0e5e0_101.tar.bz2",
                 "479a943c508ea796b708d4eaaa6bf03b5168c877a454190d67a75f28a44a2461",
             ),
             (
@@ -773,8 +773,8 @@ mod conda_dl {
 
         pub const DLS: &[(&'static str, &'static str, &'static str)] = &[
             (
-                "hdf5x-1.12.0-h1756f20_0.tar.bz2",
-                "https://anaconda.org/anaconda/hdf5x/1.12.0/download/win-64/hdf5x-1.12.0-h1756f20_0.tar.bz2",
+                "hdf5-1.12.0-h1756f20_0.tar.bz2",
+                "https://anaconda.org/anaconda/hdf5/1.12.0/download/win-64/hdf5-1.12.0-h1756f20_0.tar.bz2",
                 "747997999fc56b5c878cc8ee224b486266ac1c77ddf8407529a91eb851abf3d7",
             ),
             (
@@ -846,14 +846,14 @@ mod conda_dl {
         #[cfg(target_os = "windows")]
         {
             println!("cargo:rustc-link-lib=static=zlibstatic");
-            println!("cargo:rustc-link-lib=static=libhdf5x");
+            println!("cargo:rustc-link-lib=static=libhdf5");
         }
 
         #[cfg(target_os = "linux")]
-        println!("cargo:rustc-link-lib=static=hdf5x");
+        println!("cargo:rustc-link-lib=static=hdf5");
 
         #[cfg(target_os = "macos")]
-        println!("cargo:rustc-link-lib=static=hdf5x");
+        println!("cargo:rustc-link-lib=static=hdf5");
 
         #[cfg(not(target_os = "windows"))]
         println!("cargo:rustc-link-lib=static=z");
