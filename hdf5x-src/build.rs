@@ -6,7 +6,7 @@ fn feature_enabled(feature: &str) -> bool {
 
 fn main() {
     println!("cargo:rerun-if-changed=build.rs");
-    let mut cfg = cmake::Config::new("ext/hdf5x");
+    let mut cfg = cmake::Config::new("ext/hdf5");
 
     // only build the static c library, disable everything else
     cfg.define("HDF5_NO_PACKAGES", "ON");
@@ -63,14 +63,14 @@ fn main() {
 
     if feature_enabled("HL") {
         cfg.define("HDF5_BUILD_HL_LIB", "ON");
-        let mut hdf5x_hl_lib =
+        let mut hdf5_hl_lib =
             if cfg!(target_env = "msvc") { "libhdf5_hl" } else { "hdf5_hl" }.to_owned();
         if let Ok(opt_level) = env::var("OPT_LEVEL") {
             if opt_level == "0" {
-                hdf5x_hl_lib.push_str(debug_postfix);
+                hdf5_hl_lib.push_str(debug_postfix);
             }
         }
-        println!("cargo:hl_library={}", hdf5x_hl_lib);
+        println!("cargo:hl_library={}", hdf5_hl_lib);
     }
 
     if cfg!(unix) && targeting_windows {
@@ -83,14 +83,14 @@ fn main() {
     let dst = cfg.build();
     println!("cargo:root={}", dst.display());
 
-    let hdf5x_incdir = format!("{}/include", dst.display());
-    println!("cargo:include={}", hdf5x_incdir);
+    let hdf5_incdir = format!("{}/include", dst.display());
+    println!("cargo:include={}", hdf5_incdir);
 
-    let mut hdf5x_lib = if cfg!(target_env = "msvc") { "libhdf5" } else { "hdf5" }.to_owned();
+    let mut hdf5_lib = if cfg!(target_env = "msvc") { "libhdf5" } else { "hdf5" }.to_owned();
     if let Ok(opt_level) = env::var("OPT_LEVEL") {
         if opt_level == "0" {
-            hdf5x_lib.push_str(debug_postfix);
+            hdf5_lib.push_str(debug_postfix);
         }
     }
-    println!("cargo:library={}", hdf5x_lib);
+    println!("cargo:library={}", hdf5_lib);
 }
