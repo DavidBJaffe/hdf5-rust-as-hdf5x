@@ -233,7 +233,7 @@ pub struct LibrarySearcher {
 mod unix {
     use super::*;
 
-    pub fn find_hdf5x_via_pkg_config(config: &mut LibrarySearcher) {
+    pub fn find_hdf5_via_pkg_config(config: &mut LibrarySearcher) {
         if config.inc_dir.is_some() {
             return;
         }
@@ -269,7 +269,7 @@ mod unix {
         }
     }
 
-    pub fn find_hdf5x_in_default_location(config: &mut LibrarySearcher) {
+    pub fn find_hdf5_in_default_location(config: &mut LibrarySearcher) {
         if config.inc_dir.is_some() {
             return;
         }
@@ -293,7 +293,7 @@ mod unix {
 mod macos {
     use super::*;
 
-    pub fn find_hdf5x_via_homebrew(config: &mut LibrarySearcher) {
+    pub fn find_hdf5_via_homebrew(config: &mut LibrarySearcher) {
         if config.inc_dir.is_some() {
             return;
         }
@@ -394,7 +394,7 @@ mod windows {
     }
 
     impl App {
-        fn check_hdf5x(&self, version: Option<Version>) -> bool {
+        fn check_hdf5(&self, version: Option<Version>) -> bool {
             version.unwrap_or(self.version) == self.version
                 && &self.name == "HDF5"
                 && self.version.is_valid()
@@ -414,14 +414,14 @@ mod windows {
         Ok(installed)
     }
 
-    fn get_hdf5x_app(version: Option<Version>) -> Option<App> {
+    fn get_hdf5_app(version: Option<Version>) -> Option<App> {
         if let Some(version) = version {
             println!("Searching for installed HDF5 with version {:?}...", version);
         } else {
             println!("Searching for installed HDF5 (any version)...")
         }
         let apps = get_installed_apps().ok()?;
-        let mut apps: Vec<_> = apps.iter().filter(|app| app.check_hdf5x(version)).collect();
+        let mut apps: Vec<_> = apps.iter().filter(|app| app.check_hdf5(version)).collect();
         apps.sort_by_key(|app| app.version);
         if apps.is_empty() {
             println!("Found no HDF5 installations.");
@@ -443,7 +443,7 @@ mod windows {
         Some(latest.clone())
     }
 
-    pub fn find_hdf5x_via_winreg(config: &mut LibrarySearcher) {
+    pub fn find_hdf5_via_winreg(config: &mut LibrarySearcher) {
         // Official HDF5 binaries on Windows are built for MSVC toolchain only.
         if config.inc_dir.is_some() || !cfg!(target_env = "msvc") {
             return;
@@ -451,7 +451,7 @@ mod windows {
         // Check the list of installed programs, see if there's HDF5 anywhere;
         // if the version is provided, try to match that, otherwise pick the
         // latest version available.
-        if let Some(app) = get_hdf5x_app(config.version) {
+        if let Some(app) = get_hdf5_app(config.version) {
             config.version = Some(app.version);
             config.inc_dir = Some(PathBuf::from(app.location).join("include"));
         }
@@ -514,19 +514,19 @@ impl LibrarySearcher {
         config
     }
 
-    pub fn try_locate_hdf5x_library(&mut self) {
+    pub fn try_locate_hdf5_library(&mut self) {
         #[cfg(all(unix, not(target_os = "macos")))]
         {
-            self::unix::find_hdf5x_via_pkg_config(self);
-            self::unix::find_hdf5x_in_default_location(self);
+            self::unix::find_hdf5_via_pkg_config(self);
+            self::unix::find_hdf5_in_default_location(self);
         }
         #[cfg(target_os = "macos")]
         {
-            self::macos::find_hdf5x_via_homebrew(self);
+            self::macos::find_hdf5_via_homebrew(self);
         }
         #[cfg(windows)]
         {
-            self::windows::find_hdf5x_via_winreg(self);
+            self::windows::find_hdf5_via_winreg(self);
             // the check below is for dynamic linking only
             self::windows::validate_env_path(self);
         }
@@ -651,7 +651,7 @@ fn main() {
         get_build_and_emit();
     } else {
         let mut searcher = LibrarySearcher::new_from_env();
-        searcher.try_locate_hdf5x_library();
+        searcher.try_locate_hdf5_library();
         let config = searcher.finalize();
         println!("{:#?}", config);
         config.emit_link_flags();
@@ -671,22 +671,22 @@ fn get_build_and_emit() {
     }
 
     if feature_enabled("HL") {
-        let hdf5x_hl_lib = env::var("DEP_HDF5SRC_HL_LIBRARY").unwrap();
-        println!("cargo:rustc-link-lib=static={}", &hdf5x_hl_lib);
-        println!("cargo:hl_library={}", &hdf5x_hl_lib);
+        let hdf5_hl_lib = env::var("DEP_HDF5SRC_HL_LIBRARY").unwrap();
+        println!("cargo:rustc-link-lib=static={}", &hdf5_hl_lib);
+        println!("cargo:hl_library={}", &hdf5_hl_lib);
     }
 
-    let hdf5x_root = env::var("DEP_HDF5SRC_ROOT").unwrap();
-    println!("cargo:root={}", &hdf5x_root);
-    let hdf5x_incdir = env::var("DEP_HDF5SRC_INCLUDE").unwrap();
-    println!("cargo:include={}", &hdf5x_incdir);
-    let hdf5x_lib = env::var("DEP_HDF5SRC_LIBRARY").unwrap();
-    println!("cargo:library={}", &hdf5x_lib);
+    let hdf5_root = env::var("DEP_HDF5SRC_ROOT").unwrap();
+    println!("cargo:root={}", &hdf5_root);
+    let hdf5_incdir = env::var("DEP_HDF5SRC_INCLUDE").unwrap();
+    println!("cargo:include={}", &hdf5_incdir);
+    let hdf5_lib = env::var("DEP_HDF5SRC_LIBRARY").unwrap();
+    println!("cargo:library={}", &hdf5_lib);
 
-    println!("cargo:rustc-link-search=native={}/lib", &hdf5x_root);
-    println!("cargo:rustc-link-lib=static={}", &hdf5x_lib);
+    println!("cargo:rustc-link-search=native={}/lib", &hdf5_root);
+    println!("cargo:rustc-link-lib=static={}", &hdf5_lib);
 
-    let header = Header::parse(&hdf5x_incdir);
+    let header = Header::parse(&hdf5_incdir);
     let config = Config { header, inc_dir: "".into(), link_paths: Vec::new() };
     config.emit_cfg_flags();
 }
